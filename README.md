@@ -46,8 +46,7 @@ Esprit-PI-2A1-2026-HBFitness/
 │   ├── partials/      # Back Office partials
 │   └── pages/         # Back Office content pages
 ├── config/
-├── database/
-│   └── hb_fitness.sql
+│   
 └── README.md
 ```
 
