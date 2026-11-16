@@ -25,14 +25,15 @@ The project follows the **MVC (Model-View-Controller)** architecture:
 - `includes/` & `partials/`: Reusable UI components.
 
 ## Contributors
-- [Votre Nom] (Team Leader & User Module)
-- [Nom 2] (Nutrition Module)
-- [Nom 3] (Workout Module)
-- [Nom 4] (Events & Sponsors Module)
-- [Nom 5] (Marketplace Module)
-- [Nom 6] (Sessions & Membership Module)
+- Labidi Abderrahman - Team Leader & User Module
+- Mariem Ben Mrad - Nutrition Module
+- Sofien Boudhaouia - Workout Module
+- Mouaadh Ben Youssef - Events Module
+- Ghabri Ali Marketplace Module
+- Sessions Module 
+- Membership Module
 
-## Academic Context
+ Academic Context
 - **University:** Esprit School of Engineering
 - **Module:** Web Technologies Project
 - **Class:** 2A1
@@ -41,4 +42,4 @@ The project follows the **MVC (Model-View-Controller)** architecture:
 ## Getting Started
 1. Clone the repository:
    ```bash
-   git clone https://github.com/abderralrhman/Esprit-PI-2A1-2026-HBFitness.git
+   git clone https://github.com/abderralrhman/Esprit-WebDev-2A1-2026-HBFitness.git
