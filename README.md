@@ -7,7 +7,7 @@ HB Fitness is a comprehensive web application for managing fitness activities, n
 *   **User Management:** Handles user accounts, profiles, and role-based access control.
 *   **Nutrition:** Users can browse healthy recipes and nutritional macros organized by category.
 *   **Workout:** Provides structured training plans, exercises, and muscle group tracking.
-*   **Events and Sponsors:** Manages community fitness events, capacities, registrations, and official sponsors.
+*   **Events:** Manages community fitness events, capacities, registrations, and official sponsors.
 *   **Marketplace:** Allows users to swap or sell used fitness equipment through listings and orders.
 *   **Sessions:** Enables booking for specialized coaching and training sessions.
 *   **Membership:** Handles user subscriptions and membership plans.
@@ -25,7 +25,7 @@ This project follows the **MVC (Model-View-Controller)** architecture to separat
 *   **Views:** Contains the dynamic PHP user interface integrating data sent by the controllers.
 
 ## Contributors
-- Labidi Abderrahman - Team Leader & User Module
+- Labidi Abderrahman - User Module
 - Mariem Ben Mrad - Nutrition Module
 - Sofien Boudhaouia - Workout Module
 - Mouaadh Ben Youssef - Events Module
