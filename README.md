@@ -30,8 +30,9 @@ This project follows the **MVC (Model-View-Controller)** architecture to separat
 - Sofien Boudhaouia - Workout Module
 - Mouaadh Ben Youssef - Events Module
 - Ghabri Ali - Marketplace Module
-- Sessions Module 
+- Hanin Aouina Sessions Module 
 - Membership Module
+- Challenges Module
 
 ## Academic Context
 - **University:** Esprit School of Engineering
