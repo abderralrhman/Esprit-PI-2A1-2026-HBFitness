@@ -1,4 +1,4 @@
-# Esprit-PI-2A1-2026-HBFitness
+# Esprit-WebDev-2A1-2026-HBFitness
 
 ## Overview
 HB Fitness is a comprehensive web application for managing fitness activities, nutrition, workouts, and community events. This project is part of the Web Technologies module for the 2A1 class at ESPRIT (Academic Year 2026-2027).
@@ -13,7 +13,7 @@ HB Fitness is a comprehensive web application for managing fitness activities, n
 - Membership & Challenges
 
 ## Tech Stack
-- **Frontend:** HTML5, CSS3, JavaScript, Bootstrap
+- **Frontend:** HTML5, CSS3, JavaScript
 - **Backend:** PHP (MVC Architecture)
 - **Database:** MySQL
 
