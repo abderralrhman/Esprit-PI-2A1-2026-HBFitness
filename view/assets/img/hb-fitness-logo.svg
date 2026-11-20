@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 220" fill="none">
+  <defs>
+    <linearGradient id="silverGradFull" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#EAEAEA"/>
+      <stop offset="55%" stop-color="#B4B4B4"/>
+      <stop offset="100%" stop-color="#8A8A8A"/>
+    </linearGradient>
+    <linearGradient id="crimsonGradFull" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#C8083B"/>
+      <stop offset="55%" stop-color="#910329"/>
+      <stop offset="100%" stop-color="#6A021D"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Top Crimson Motion Swoosh -->
+  <path d="M76 58 C110 14, 212 6, 232 34 C240 45, 234 59, 220 66 C226 51, 219 38, 202 32 C170 21, 114 30, 76 58 Z" fill="url(#crimsonGradFull)"/>
+
+  <!-- Bottom Silver Motion Swoosh -->
+  <path d="M224 120 C186 160, 88 166, 66 138 C58 127, 64 113, 78 106 C73 121, 80 134, 98 140 C130 150, 186 142, 224 120 Z" fill="url(#silverGradFull)"/>
+
+  <!-- Bold Italic 'H' (Silver) -->
+  <path d="M74 126 L98 48 L122 48 L113 77 L144 77 L153 48 L177 48 L153 126 L129 126 L138 96 L107 96 L98 126 Z" fill="url(#silverGradFull)"/>
+
+  <!-- Bold Italic 'B' (Crimson) -->
+  <path d="M166 126 L190 48 L236 48 C253 48, 262 57, 257 70 C254 79, 247 85, 238 87 C248 90, 253 98, 249 108 C245 120, 231 126, 214 126 Z M206 78 L225 78 C231 78, 234 75, 235 70 C236 66, 234 63, 227 63 L210 63 Z M196 110 L217 110 C224 110, 228 107, 229 101 C230 96, 227 93, 220 93 L201 93 Z" fill="url(#crimsonGradFull)"/>
+
+  <!-- Wordmark: HB FITNESS -->
+  <text x="160" y="196" text-anchor="middle" font-family="Oswald, Impact, 'Arial Black', sans-serif" font-style="italic" font-weight="700" font-size="34" letter-spacing="3">
+    <tspan fill="#B4B4B4">HB </tspan><tspan fill="#910329">FITNESS</tspan>
+  </text>
+</svg>
