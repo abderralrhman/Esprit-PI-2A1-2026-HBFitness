@@ -4,7 +4,7 @@ require_once __DIR__ . '/../Models/step.php';
 
 class StepController {
     public function listStepsByRecipe(int $recipeId): array {
-        $db = Config::getConnexion();
+        $db = Database::getConnexion();
         $stmt = $db->prepare("
             SELECT id, recipe_id, step_number, instruction
             FROM recipe_steps
@@ -16,7 +16,7 @@ class StepController {
     }
 
     public function listAllSteps(): array {
-        $db = Config::getConnexion();
+        $db = Database::getConnexion();
         $sql = "
             SELECT rs.id, rs.recipe_id, rs.step_number, rs.instruction, r.title AS recipe_title
             FROM recipe_steps rs
@@ -27,7 +27,7 @@ class StepController {
     }
 
     public function addStep(Step $step): bool {
-        $db = Config::getConnexion();
+        $db = Database::getConnexion();
         $stmt = $db->prepare("
             INSERT INTO recipe_steps (recipe_id, step_number, instruction)
             VALUES (:recipe_id, :step_number, :instruction)
@@ -40,7 +40,7 @@ class StepController {
     }
 
     public function updateStep(Step $step, int $id): bool {
-        $db = Config::getConnexion();
+        $db = Database::getConnexion();
         $stmt = $db->prepare("
             UPDATE recipe_steps
             SET recipe_id = :recipe_id,
@@ -57,7 +57,7 @@ class StepController {
     }
 
     public function deleteStep(int $id): bool {
-        $db = Config::getConnexion();
+        $db = Database::getConnexion();
         $stmt = $db->prepare("DELETE FROM recipe_steps WHERE id = :id");
         return $stmt->execute(['id' => $id]);
     }

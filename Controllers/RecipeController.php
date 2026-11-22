@@ -4,7 +4,7 @@ require_once __DIR__ . '/../Models/Recipe.php';
 
 class RecipeController {
     public function listRecipes(?int $categoryId = null, string $search = ''): array {
-        $db = Config::getConnexion();
+        $db = Database::getConnexion();
         $sql = "
             SELECT r.id, r.category_id, r.title, r.description, r.prep_time, r.cook_time, r.calories, r.created_at,
                    rc.name AS category_name
@@ -32,7 +32,7 @@ class RecipeController {
     }
 
     public function getRecipeById(int $id): ?array {
-        $db = Config::getConnexion();
+        $db = Database::getConnexion();
         $stmt = $db->prepare("
             SELECT r.id, r.category_id, r.title, r.description, r.prep_time, r.cook_time, r.calories, r.created_at,
                    rc.name AS category_name
@@ -46,7 +46,7 @@ class RecipeController {
     }
 
     public function addRecipe(Recipe $recipe): bool {
-        $db = Config::getConnexion();
+        $db = Database::getConnexion();
         $stmt = $db->prepare("
             INSERT INTO recipes (category_id, title, description, prep_time, cook_time, calories)
             VALUES (:category_id, :title, :description, :prep_time, :cook_time, :calories)
@@ -62,7 +62,7 @@ class RecipeController {
     }
 
     public function updateRecipe(Recipe $recipe, int $id): bool {
-        $db = Config::getConnexion();
+        $db = Database::getConnexion();
         $stmt = $db->prepare("
             UPDATE recipes
             SET category_id = :category_id,
@@ -85,7 +85,7 @@ class RecipeController {
     }
 
     public function deleteRecipe(int $id): bool {
-        $db = Config::getConnexion();
+        $db = Database::getConnexion();
         $stmt = $db->prepare("DELETE FROM recipes WHERE id = :id");
         return $stmt->execute(['id' => $id]);
     }

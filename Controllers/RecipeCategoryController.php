@@ -4,7 +4,7 @@ require_once __DIR__ . '/../Models/RecipeCategory.php';
 
 class RecipeCategoryController {
     public function listCategories(): array {
-        $db = Config::getConnexion();
+        $db = Database::getConnexion();
         $sql = "
             SELECT rc.id, rc.name, COUNT(r.id) AS recipes_count
             FROM recipe_categories rc
@@ -16,7 +16,7 @@ class RecipeCategoryController {
     }
 
     public function getCategoryById(int $id): ?array {
-        $db = Config::getConnexion();
+        $db = Database::getConnexion();
         $stmt = $db->prepare("SELECT id, name FROM recipe_categories WHERE id = :id");
         $stmt->execute(['id' => $id]);
         $row = $stmt->fetch();
@@ -24,13 +24,13 @@ class RecipeCategoryController {
     }
 
     public function addCategory(RecipeCategory $category): bool {
-        $db = Config::getConnexion();
+        $db = Database::getConnexion();
         $stmt = $db->prepare("INSERT INTO recipe_categories (name) VALUES (:name)");
         return $stmt->execute(['name' => $category->getName()]);
     }
 
     public function updateCategory(RecipeCategory $category, int $id): bool {
-        $db = Config::getConnexion();
+        $db = Database::getConnexion();
         $stmt = $db->prepare("UPDATE recipe_categories SET name = :name WHERE id = :id");
         return $stmt->execute([
             'name' => $category->getName(),
@@ -39,7 +39,7 @@ class RecipeCategoryController {
     }
 
     public function deleteCategory(int $id): bool {
-        $db = Config::getConnexion();
+        $db = Database::getConnexion();
         $stmt = $db->prepare("DELETE FROM recipe_categories WHERE id = :id");
         return $stmt->execute(['id' => $id]);
     }
