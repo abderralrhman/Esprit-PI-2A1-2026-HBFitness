@@ -512,6 +512,9 @@ final class MarketplaceRepository
             'Accessoires' => ['Accessories', '🎽', 'Small equipment and sportswear'],
             'Outdoor Sports' => ['Outdoor Sports', '⛰️', 'Equipment for outdoor training'],
             'Sports outdoor' => ['Outdoor Sports', '⛰️', 'Equipment for outdoor training'],
+            'Boxing & Combat' => ['Boxing & Combat', '🥊', 'Gloves, punching bags, and fight gear'],
+            'Crossfit & Functional' => ['Crossfit & Functional', '⚡', 'Kettlebells, rings, and functional training'],
+            'Recovery & Mobility' => ['Recovery & Mobility', '💆', 'Massage guns, foam rollers, and mobility tools'],
         ];
         $details = $presentation[$name] ?? [$name, '📦', 'Sports equipment'];
         [$label, $icon, $description] = $details;
