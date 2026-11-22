@@ -30,9 +30,12 @@ if ($getAction === 'signup') {
 
 $currentUser = AuthController::currentUser();
 $isAdmin     = AuthController::isAdmin();
+$isCoach     = AuthController::isCoach();
+$isStaff     = AuthController::isStaff();
 
-$page = $_GET['page'] ?? ($currentUser ? ($isAdmin ? 'admin' : 'user') : 'landing');
-if (!in_array($page, ['landing', 'sports', 'admin', 'user'], true)) {
+$defaultPage = $currentUser ? ($isAdmin ? 'admin' : ($isCoach ? 'coach' : 'user')) : 'landing';
+$page = $_GET['page'] ?? $defaultPage;
+if (!in_array($page, ['landing', 'sports', 'admin', 'coach', 'user'], true)) {
     $page = 'landing';
 }
 
@@ -73,6 +76,10 @@ if (!$currentUser) {
 }
 if ($page === 'admin' && !$isAdmin) {
     AuthController::flash('Access denied: the admin back-office is reserved for administrators.', 'error');
+    AuthController::redirect($isCoach ? '/index.php?page=coach' : '/index.php?page=user');
+}
+if ($page === 'coach' && !$isStaff) {
+    AuthController::flash('Access denied: the Coach Studio is reserved for coaches and administrators.', 'error');
     AuthController::redirect('/index.php?page=user');
 }
 
@@ -170,7 +177,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $existing = null;
                 if ($action === 'update' || $action === 'delete') {
                     $existing = $articleC->getArticleById($id);
-                    assertOwnership($existing, $currentUser, $isAdmin, 'fitness article');
+                    assertOwnership($existing, $currentUser, $isStaff, 'fitness article');
                 }
                 if ($action === 'like') {
                     if (!$articleC->getArticleById($id)) {
@@ -231,10 +238,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $existing = null;
                 if ($action === 'update' || $action === 'delete') {
                     $existing = $commentC->getCommentById($id);
-                    assertOwnership($existing, $currentUser, $isAdmin, 'comment');
+                    assertOwnership($existing, $currentUser, $isStaff, 'comment');
                 }
                 if ($action === 'create' || $action === 'update') {
-                    $articleId   = (!$isAdmin && $existing) ? (int)$existing['article_id'] : (int)($_POST['article_id'] ?? 0);
+                    $articleId   = (!$isStaff && $existing) ? (int)$existing['article_id'] : (int)($_POST['article_id'] ?? 0);
                     $content     = trim($_POST['content'] ?? '');
                     $isCoachPick = AuthController::isStaff() ? (isset($_POST['is_coach_pick']) ? 1 : 0) : ($existing ? (int)$existing['is_coach_pick'] : 0);
                     $errors = [];
@@ -283,6 +290,8 @@ $comments = $commentC->listComments();
 
 if ($page === 'admin') {
     include __DIR__ . '/view/admin_dashboard.php';
+} elseif ($page === 'coach') {
+    include __DIR__ . '/view/coach_dashboard.php';
 } else {
     include __DIR__ . '/view/user_portal.php';
 }

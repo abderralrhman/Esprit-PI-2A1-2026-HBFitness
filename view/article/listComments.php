@@ -4,6 +4,8 @@ require_once __DIR__ . '/../../controller/article/CommentController.php';
 
 $currentUser = AuthController::requireLogin();
 $isAdmin     = AuthController::isAdmin();
+$isCoach     = AuthController::isCoach();
+$isStaff     = AuthController::isStaff();
 $commentC    = new CommentController();
 $comments    = $commentC->listComments();
 ?>
@@ -28,7 +30,7 @@ $comments    = $commentC->listComments();
         <section class="crud-page-header">
             <div>
                 <div class="breadcrumb-trail">
-                    <a href="../../index.php?page=<?= $isAdmin ? 'admin' : 'user' ?>"><?= $isAdmin ? 'Admin Dashboard' : 'Athlete Hub' ?></a>
+                    <a href="../../index.php?page=<?= $isAdmin ? 'admin' : ($isCoach ? 'coach' : 'user') ?>"><?= $isAdmin ? 'Admin Dashboard' : ($isCoach ? 'Coach Studio' : 'Athlete Hub') ?></a>
                     <span>/</span> <span>Articles</span> <span>/</span> <span>Comments</span>
                 </div>
                 <h1><i class="fa-solid fa-comments"></i> Article Comments</h1>
@@ -68,7 +70,7 @@ $comments    = $commentC->listComments();
                     </thead>
                     <tbody>
                         <?php foreach ($comments as $c):
-                            $canEdit = $isAdmin || ((int)$c['user_id'] === (int)$currentUser['id']);
+                            $canEdit = $isStaff || ((int)$c['user_id'] === (int)$currentUser['id']);
                         ?>
                         <tr class="comment-row">
                             <td><strong>#<?= (int)$c['id'] ?></strong></td>

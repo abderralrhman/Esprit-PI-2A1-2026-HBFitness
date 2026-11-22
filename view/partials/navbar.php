@@ -42,8 +42,21 @@ $isCoach    = $cu && ($cu['role'] === 'coach');
             <a href="<?= $basePrefix ?>view/sports/sports.php" class="nav-btn <?= $activeNav === 'sports' ? 'active' : '' ?>">
                 <i class="fa-solid fa-person-running"></i> Sports
             </a>
-            <a href="<?= $basePrefix ?>view/user/listUsers.php" class="nav-btn <?= $activeNav === 'users' ? 'active' : '' ?>">
+            <a href="<?= $basePrefix ?>view/user/manageUsers.php" class="nav-btn <?= $activeNav === 'users' ? 'active' : '' ?>">
                 <i class="fa-solid fa-users-gear"></i> Users
+            </a>
+        <?php elseif ($isCoach): ?>
+            <a href="<?= $basePrefix ?>index.php?page=coach" class="nav-btn <?= $activeNav === 'coach' ? 'active' : '' ?>">
+                <i class="fa-solid fa-dumbbell"></i> Coach Studio
+            </a>
+            <a href="<?= $basePrefix ?>view/article/listArticles.php" class="nav-btn <?= $activeNav === 'articles' ? 'active' : '' ?>">
+                <i class="fa-solid fa-newspaper"></i> Articles
+            </a>
+            <a href="<?= $basePrefix ?>view/article/listComments.php" class="nav-btn <?= $activeNav === 'comments' ? 'active' : '' ?>">
+                <i class="fa-solid fa-comments"></i> Comments
+            </a>
+            <a href="<?= $basePrefix ?>view/sports/sports.php" class="nav-btn <?= $activeNav === 'sports' ? 'active' : '' ?>">
+                <i class="fa-solid fa-person-running"></i> Sports
             </a>
         <?php elseif ($cu): ?>
             <a href="<?= $basePrefix ?>index.php?page=user" class="nav-btn <?= $activeNav === 'user' ? 'active' : '' ?>">
@@ -71,7 +84,7 @@ $isCoach    = $cu && ($cu['role'] === 'coach');
     <div class="role-switcher">
         <?php if ($cu): ?>
             <span class="role-pill <?= $isAdm ? 'admin' : ($isCoach ? 'coach' : '') ?>">
-                <i class="fa-solid <?= $isAdm ? 'fa-shield-halved' : ($isCoach ? 'fa-whistle' : 'fa-user-check') ?>"></i>
+                <i class="fa-solid <?= $isAdm ? 'fa-shield-halved' : ($isCoach ? 'fa-medal' : 'fa-user-check') ?>"></i>
                 <?= htmlspecialchars($cu['full_name']) ?> (<?= strtoupper(htmlspecialchars($cu['role'])) ?>)
             </span>
             <?php if ($isAdm): ?>

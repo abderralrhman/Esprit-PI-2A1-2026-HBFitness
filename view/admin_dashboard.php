@@ -26,11 +26,14 @@
                 <p>Manage fitness articles, highlight Coach Pick comments, explore sports disciplines, and oversee athlete accounts.</p>
             </div>
             <div style="display:flex;gap:0.65rem;flex-wrap:wrap;z-index:1;">
-                <a href="index.php?page=user" class="btn btn-outline" >
+                <a href="index.php?page=coach" class="btn btn-outline">
+                    <i class="fa-solid fa-medal"></i> Preview Coach Studio
+                </a>
+                <a href="index.php?page=user" class="btn btn-outline">
                     <i class="fa-solid fa-eye"></i> Preview Athlete Portal
                 </a>
-                <a href="view/user/createUser.php" class="btn btn-green">
-                    <i class="fa-solid fa-user-plus"></i> New User
+                <a href="view/user/manageUsers.php" class="btn btn-green">
+                    <i class="fa-solid fa-users-gear"></i> Manage Users
                 </a>
             </div>
         </section>
@@ -146,8 +149,8 @@
                     </p>
                 </div>
                 <div class="module-hub-actions">
-                    <a href="view/user/listUsers.php" class="btn btn-navy btn-sm"><i class="fa-solid fa-users"></i> All Users (<?= count($users) ?>)</a>
-                    <a href="view/user/createUser.php" class="btn btn-primary btn-sm"><i class="fa-solid fa-user-plus"></i> Create User</a>
+                    <a href="view/user/manageUsers.php" class="btn btn-primary btn-sm"><i class="fa-solid fa-users-gear"></i> User Manager (<?= count($users) ?>)</a>
+                    <a href="view/user/listUsers.php" class="btn btn-navy btn-sm"><i class="fa-solid fa-table"></i> Classic List</a>
                 </div>
             </div>
         </section>

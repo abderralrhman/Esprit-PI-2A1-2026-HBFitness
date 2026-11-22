@@ -9,6 +9,18 @@ class UserController {
         return $stmt->fetchAll();
     }
 
+    public function listUsersWithStats(): array {
+        $db = Config::getConnexion();
+        $sql = "
+            SELECT u.*,
+                   (SELECT COUNT(*) FROM articles a WHERE a.user_id = u.id) AS articles_count,
+                   (SELECT COUNT(*) FROM comments c WHERE c.user_id = u.id) AS comments_count
+            FROM users u
+            ORDER BY u.id DESC
+        ";
+        return $db->query($sql)->fetchAll();
+    }
+
     public function getUserById(int $id): ?array {
         $db = Config::getConnexion();
         $stmt = $db->prepare("SELECT * FROM users WHERE id = :id");

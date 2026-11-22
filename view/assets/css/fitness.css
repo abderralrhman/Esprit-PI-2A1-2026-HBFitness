@@ -1491,6 +1491,186 @@ h1, h2, h3, h4, .card-title, .section-title, .brand-name {
     color: var(--white);
 }
 
+/* =========================================================
+   Personalized User Management CRUD Interface & Dark Modals
+   ========================================================= */
+.user-avatar-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: #fff;
+    border: 1.5px solid rgba(255, 255, 255, 0.22);
+    flex-shrink: 0;
+    text-transform: uppercase;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.45);
+}
+
+.user-avatar-lg {
+    width: 72px;
+    height: 72px;
+    border-radius: 20px;
+    font-size: 1.75rem;
+}
+
+.view-switcher {
+    display: inline-flex;
+    background: #0D0D10;
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 3px;
+}
+
+.view-switch-btn {
+    border: none;
+    background: transparent;
+    color: var(--hb-silver);
+    padding: 0.42rem 0.78rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: all 0.2s ease;
+}
+
+.view-switch-btn.active {
+    background: var(--gradient-brand);
+    color: #fff;
+}
+
+.color-swatches {
+    display: flex;
+    gap: 0.55rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.color-swatch {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.color-swatch.selected {
+    transform: scale(1.16);
+    border-color: #fff;
+    box-shadow: 0 0 0 3px rgba(232, 64, 94, 0.5);
+}
+
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(3, 3, 3, 0.82);
+    backdrop-filter: blur(8px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 260;
+    padding: 1rem;
+}
+
+.modal-backdrop.open {
+    display: flex;
+    animation: fadeSlideUp 0.22s ease;
+}
+
+.modal-box {
+    background: var(--hb-charcoal);
+    border: 1px solid rgba(232, 64, 94, 0.35);
+    border-top: 5px solid var(--hb-crimson);
+    border-radius: 20px;
+    max-width: 580px;
+    width: 100%;
+    padding: 1.75rem;
+    box-shadow: 0 28px 60px -12px rgba(0, 0, 0, 0.9);
+    max-height: 92vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 0.9rem;
+    margin-bottom: 1.15rem;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.modal-header h3 {
+    font-size: 1.35rem;
+    text-transform: uppercase;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.modal-header h3 i {
+    color: var(--hb-coral);
+}
+
+.modal-close-btn {
+    background: #0D0D10;
+    border: 1px solid var(--border-subtle);
+    color: var(--hb-silver);
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.modal-close-btn:hover {
+    background: var(--hb-crimson);
+    color: #fff;
+    border-color: var(--hb-coral);
+}
+
+.user-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+    margin: 1rem 0;
+}
+
+.user-detail-item {
+    background: #0D0D10;
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    padding: 0.8rem 0.95rem;
+}
+
+.user-detail-item small {
+    display: block;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--hb-coral);
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+}
+
+.user-detail-item strong {
+    color: #fff;
+    font-size: 0.92rem;
+    word-break: break-word;
+}
+
 @media (max-width: 960px) {
     .dual-grid { grid-template-columns: 1fr; }
     .top-navbar { flex-direction: column; gap: 0.75rem; }
