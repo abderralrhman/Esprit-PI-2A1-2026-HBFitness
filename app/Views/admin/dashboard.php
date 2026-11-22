@@ -170,7 +170,11 @@
                 <button class="filter-tab" data-filter="Completed">Completed</button>
                 <button class="filter-tab" data-filter="Cancelled">Cancelled</button>
               </div>
-              <button class="button button-secondary" id="export-orders">↓ Export</button>
+              <div class="order-search-actions">
+                <label class="order-search"><span aria-hidden="true">⌕</span><input id="order-search" type="search" placeholder="Search orders..." aria-label="Search orders"><button type="button" id="order-search-clear" aria-label="Clear order search">×</button></label>
+                <span class="order-search-count" id="order-search-count">5 results</span>
+                <button class="button button-secondary" id="export-orders">↓ Export</button>
+              </div>
             </div>
             <div class="table-wrap">
               <table>
@@ -195,12 +199,16 @@
     <section class="modal" role="dialog" aria-modal="true" aria-labelledby="order-modal-title">
       <div class="modal-heading"><div><span class="eyebrow">ORDERS</span><h2 id="order-modal-title">Create order</h2><p>Reserve an available listing for a buyer.</p></div><button type="button" class="close-button" data-close-order-modal aria-label="Close">×</button></div>
       <form id="order-form">
-        <label class="form-field">Available listing<select name="listingId"></select></label>
+        <input type="hidden" name="orderId" value="">
+        <label class="form-field">Listing<select name="listingId"></select></label>
         <div class="form-row">
           <label class="form-field">Buyer name<input name="buyerName" placeholder="Full name"></label>
+          <label class="form-field">Status<select name="orderStatus"><option>To process</option><option>Shipped</option><option>Completed</option><option>Cancelled</option></select></label>
+        </div>
+        <div class="form-row create-order-only">
           <label class="form-field">Buyer email<input name="buyerEmail" type="text" inputmode="email" placeholder="buyer@example.com"></label>
         </div>
-        <div class="modal-actions"><button type="button" class="button button-secondary" data-close-order-modal>Cancel</button><button type="submit" class="button button-primary">Create order</button></div>
+        <div class="modal-actions"><button type="button" class="button button-secondary" data-close-order-modal>Cancel</button><button type="submit" class="button button-primary" id="order-submit-button">Create order</button></div>
       </form>
     </section>
   </div>
