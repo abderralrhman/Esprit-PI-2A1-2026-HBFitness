@@ -21,8 +21,6 @@
                     <a href="index.php?action=articles" class="text-silver">Articles</a>
                     <?php if (!empty($currentUser)): ?>
                         <a href="index.php?action=my_comments" class="text-silver">My Comments</a>
-                    <?php else: ?>
-                        <a href="index.php?action=login" class="text-silver">Log In</a>
                     <?php endif; ?>
                 </div>
                 <p class="small text-muted-hb mb-0">

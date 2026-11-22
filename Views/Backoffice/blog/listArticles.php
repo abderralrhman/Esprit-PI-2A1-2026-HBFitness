@@ -107,4 +107,4 @@ ob_start();
 </div>
 <?php
 $content = (string)ob_get_clean();
-require __DIR__ . '/../layout_admin.php';
+require __DIR__ . '/../../layout_admin.php';

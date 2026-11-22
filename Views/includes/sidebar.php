@@ -50,8 +50,8 @@ $activePage = $currentPage ?? 'admin_dashboard';
     </ul>
 
     <div class="hb-sidebar-footer">
-        <a href="index.php?action=logout" class="btn btn-hb-danger w-100 btn-sm">
-            <i class="fa-solid fa-right-from-bracket me-2"></i>Logout
+        <a href="index.php?action=home" class="btn btn-hb-outline w-100 btn-sm">
+            <i class="fa-solid fa-arrow-left me-2"></i>Back to Frontoffice
         </a>
     </div>
 </aside>

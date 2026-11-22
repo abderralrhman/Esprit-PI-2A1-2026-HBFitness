@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../Models/Article.php';
-require_once __DIR__ . '/AuthController.php';
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../Models/Blog/Article.php';
+require_once __DIR__ . '/BlogAuthAdapter.php';
 
 /**
- * Controllers/ArticleController.php
+ * Controllers/Blog/ArticleController.php
  * Complete Article CRUD + SQL JOINs (Article JOIN User, Article JOIN Comment)
- * Enforces 3-Role Permissions:
+ * Enforces 3-Role Permissions via BlogAuthAdapter (shared auth compatible):
  *   - Admin: full CRUD on all articles
  *   - Coach: create articles, edit/delete ONLY own articles
  *   - User / Visitor: read-only
@@ -16,12 +16,30 @@ require_once __DIR__ . '/AuthController.php';
 class ArticleController
 {
     private PDO $db;
-    private AuthController $auth;
+    private BlogAuthAdapter $auth;
+    private ?bool $usesNormalizedRolesTable = null;
 
-    public function __construct(?AuthController $auth = null)
+    public function __construct(?BlogAuthAdapter $auth = null)
     {
         $this->db   = Database::getConnexion();
-        $this->auth = $auth ?? new AuthController();
+        $this->auth = $auth ?? new BlogAuthAdapter();
+    }
+
+    /**
+     * Supports both the shared normalized User Management schema (users.role_id -> roles.id)
+     * and a flat users.role column without modifying either schema.
+     */
+    private function usesNormalizedRoles(): bool
+    {
+        if ($this->usesNormalizedRolesTable === null) {
+            try {
+                $stmt = $this->db->query("SHOW COLUMNS FROM users LIKE 'role_id'");
+                $this->usesNormalizedRolesTable = (bool)$stmt->fetch();
+            } catch (PDOException $e) {
+                $this->usesNormalizedRolesTable = false;
+            }
+        }
+        return $this->usesNormalizedRolesTable;
     }
 
     // =========================================================================
@@ -33,16 +51,21 @@ class ArticleController
      */
     public function getAllArticles(string $search = '', ?int $authorId = null): array
     {
-        $sql = '
+        $roleSelect = $this->usesNormalizedRoles() ? "COALESCE(r.name, 'user')" : 'u.role';
+        $roleJoin   = $this->usesNormalizedRoles() ? 'LEFT JOIN roles r ON u.role_id = r.id' : '';
+        $roleGroup  = $this->usesNormalizedRoles() ? 'r.name' : 'u.role';
+
+        $sql = "
             SELECT a.id, a.title, a.content, a.published_at, a.author_id, a.recipe_id,
                    u.full_name AS author_name,
-                   u.role AS author_role,
+                   {$roleSelect} AS author_role,
                    COUNT(c.id) AS comments_count
             FROM articles a
             INNER JOIN users u ON a.author_id = u.id
+            {$roleJoin}
             LEFT JOIN comments c ON c.article_id = a.id
             WHERE 1 = 1
-        ';
+        ";
         $params = [];
 
         $search = trim($search);
@@ -57,8 +80,8 @@ class ArticleController
             $params['author_id'] = $authorId;
         }
 
-        $sql .= ' GROUP BY a.id, a.title, a.content, a.published_at, a.author_id, a.recipe_id, u.full_name, u.role
-                  ORDER BY a.published_at DESC, a.id DESC';
+        $sql .= " GROUP BY a.id, a.title, a.content, a.published_at, a.author_id, a.recipe_id, u.full_name, {$roleGroup}
+                  ORDER BY a.published_at DESC, a.id DESC";
 
         $stmt = $this->db->prepare($sql);
         $stmt->execute($params);
@@ -72,18 +95,23 @@ class ArticleController
         if ($id <= 0) {
             return null;
         }
-        $sql = '
+        $roleSelect = $this->usesNormalizedRoles() ? "COALESCE(r.name, 'user')" : 'u.role';
+        $roleJoin   = $this->usesNormalizedRoles() ? 'LEFT JOIN roles r ON u.role_id = r.id' : '';
+        $roleGroup  = $this->usesNormalizedRoles() ? 'r.name' : 'u.role';
+
+        $sql = "
             SELECT a.id, a.title, a.content, a.published_at, a.author_id, a.recipe_id,
                    u.full_name AS author_name,
-                   u.role AS author_role,
+                   {$roleSelect} AS author_role,
                    COUNT(c.id) AS comments_count
             FROM articles a
             INNER JOIN users u ON a.author_id = u.id
+            {$roleJoin}
             LEFT JOIN comments c ON c.article_id = a.id
             WHERE a.id = :id
-            GROUP BY a.id, a.title, a.content, a.published_at, a.author_id, a.recipe_id, u.full_name, u.role
+            GROUP BY a.id, a.title, a.content, a.published_at, a.author_id, a.recipe_id, u.full_name, {$roleGroup}
             LIMIT 1
-        ';
+        ";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['id' => $id]);
         $row = $stmt->fetch();
@@ -94,18 +122,36 @@ class ArticleController
     {
         $totalArticles = (int)$this->db->query('SELECT COUNT(*) FROM articles')->fetchColumn();
         $totalComments = (int)$this->db->query('SELECT COUNT(*) FROM comments')->fetchColumn();
-        $coachArticles = (int)$this->db->query("
-            SELECT COUNT(*)
-            FROM articles a
-            INNER JOIN users u ON a.author_id = u.id
-            WHERE u.role = 'coach'
-        ")->fetchColumn();
-        $adminArticles = (int)$this->db->query("
-            SELECT COUNT(*)
-            FROM articles a
-            INNER JOIN users u ON a.author_id = u.id
-            WHERE u.role = 'admin'
-        ")->fetchColumn();
+
+        if ($this->usesNormalizedRoles()) {
+            $coachArticles = (int)$this->db->query("
+                SELECT COUNT(*)
+                FROM articles a
+                INNER JOIN users u ON a.author_id = u.id
+                INNER JOIN roles r ON u.role_id = r.id
+                WHERE r.name = 'coach'
+            ")->fetchColumn();
+            $adminArticles = (int)$this->db->query("
+                SELECT COUNT(*)
+                FROM articles a
+                INNER JOIN users u ON a.author_id = u.id
+                INNER JOIN roles r ON u.role_id = r.id
+                WHERE r.name = 'admin'
+            ")->fetchColumn();
+        } else {
+            $coachArticles = (int)$this->db->query("
+                SELECT COUNT(*)
+                FROM articles a
+                INNER JOIN users u ON a.author_id = u.id
+                WHERE u.role = 'coach'
+            ")->fetchColumn();
+            $adminArticles = (int)$this->db->query("
+                SELECT COUNT(*)
+                FROM articles a
+                INNER JOIN users u ON a.author_id = u.id
+                WHERE u.role = 'admin'
+            ")->fetchColumn();
+        }
 
         return [
             'total_articles' => $totalArticles,

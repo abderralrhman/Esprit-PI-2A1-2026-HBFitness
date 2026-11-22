@@ -96,11 +96,13 @@ ob_start();
             <div class="hb-card mb-4 d-flex flex-wrap align-items-center justify-content-between gap-3">
                 <div>
                     <h3 class="h6 mb-1">Join the Conversation</h3>
-                    <p class="small text-silver mb-0">Log in to post a comment or manage your replies.</p>
+                    <p class="small text-silver mb-0">
+                        Sign in through the shared HB FITNESS User Management module to post, edit, or delete your comments.
+                    </p>
                 </div>
-                <a href="index.php?action=login" class="btn btn-hb-primary btn-sm">
-                    <i class="fa-solid fa-right-to-bracket me-1"></i>Log In to Comment
-                </a>
+                <span class="hb-badge hb-badge-user">
+                    <i class="fa-solid fa-lock"></i>Auth Required
+                </span>
             </div>
         <?php endif; ?>
 
@@ -159,4 +161,4 @@ ob_start();
 </section>
 <?php
 $content = (string)ob_get_clean();
-require __DIR__ . '/../layout.php';
+require __DIR__ . '/../../layout.php';

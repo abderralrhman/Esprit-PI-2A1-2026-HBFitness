@@ -67,13 +67,10 @@ $role       = $user['role'] ?? null;
                             <i class="fa-solid <?= $badgeIcon ?>"></i><?= htmlspecialchars((string)$role, ENT_QUOTES, 'UTF-8') ?>
                         </span>
                     </div>
-                    <a href="index.php?action=logout" class="btn btn-hb-outline btn-sm">
-                        <i class="fa-solid fa-right-from-bracket me-1"></i>Logout
-                    </a>
                 <?php else: ?>
-                    <a href="index.php?action=login" class="btn btn-hb-primary btn-sm">
-                        <i class="fa-solid fa-right-to-bracket me-1"></i>Log In
-                    </a>
+                    <span class="hb-badge hb-badge-user" title="Sign in via the shared HB FITNESS User Management module once integrated">
+                        <i class="fa-solid fa-eye"></i>Visitor Mode
+                    </span>
                 <?php endif; ?>
             </div>
         </div>

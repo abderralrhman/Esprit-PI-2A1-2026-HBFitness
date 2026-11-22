@@ -97,4 +97,4 @@ ob_start();
 </div>
 <?php
 $content = (string)ob_get_clean();
-require __DIR__ . ($isAdmin ? '/../layout_admin.php' : '/../layout.php');
+require __DIR__ . ($isAdmin ? '/../../layout_admin.php' : '/../../layout.php');

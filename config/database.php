@@ -20,16 +20,6 @@ if (!defined('BASE_URL')) {
     define('BASE_URL', rtrim($base, '/'));
 }
 
-/**
- * LOCAL DEVELOPMENT QUICK-LOGIN SWITCH (Esprit Validation Only)
- * Set to `false` (or remove) before pushing to GitHub or deploying anywhere
- * outside localhost. Even when `true`, AuthController::isLocalQuickLoginEnabled()
- * ALSO requires REMOTE_ADDR to be 127.0.0.1 or ::1 and a localhost Host header.
- */
-if (!defined('HB_LOCAL_QUICK_LOGIN_ENABLED')) {
-    define('HB_LOCAL_QUICK_LOGIN_ENABLED', true);
-}
-
 class Database
 {
     private static ?PDO $pdo = null;

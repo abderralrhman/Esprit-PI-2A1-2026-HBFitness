@@ -34,11 +34,7 @@ ob_start();
                         <a href="index.php?action=create_article" class="btn btn-hb-outline">
                             <i class="fa-solid fa-pen-nib me-2"></i>Publish Article
                         </a>
-                    <?php elseif (!$currentUser): ?>
-                        <a href="index.php?action=login" class="btn btn-hb-outline">
-                            <i class="fa-solid fa-right-to-bracket me-2"></i>Log In to Comment
-                        </a>
-                    <?php else: ?>
+                    <?php elseif ($currentUser): ?>
                         <a href="index.php?action=my_comments" class="btn btn-hb-outline">
                             <i class="fa-solid fa-comments me-2"></i>My Comments
                         </a>
@@ -187,4 +183,4 @@ ob_start();
 </section>
 <?php
 $content = (string)ob_get_clean();
-require __DIR__ . '/../layout.php';
+require __DIR__ . '/../../layout.php';

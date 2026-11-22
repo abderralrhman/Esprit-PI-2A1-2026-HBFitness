@@ -1,42 +1,22 @@
 -- ============================================================================
--- HB FITNESS — Blog Model Standalone Database Schema (Esprit 2026-2027)
--- Module 1: Blog Management (Article 1 — N Comment)
--- Importable directly via phpMyAdmin
+-- HB FITNESS — Blog Module Database Schema (Integration-Ready)
+-- Assigned Module: Blog Management (Article 1 — N Comment)
+-- Repository Target: Esprit-PI-2A1-2026-HBFitness
 -- Engine: InnoDB | Charset: utf8mb4
+--
+-- NON-DESTRUCTIVE MIGRATION INSTRUCTIONS:
+-- 1. Select the shared HB FITNESS database in phpMyAdmin (containing the
+--    team's existing `users` table with `id INT UNSIGNED PRIMARY KEY`).
+-- 2. Import this file. It ONLY creates `articles` and `comments` if they do
+--    not already exist; it NEVER drops tables or overwrites `users` data.
+-- 3. `recipe_id` is intentionally nullable for future Nutrition-module linkage.
 -- ============================================================================
-
-CREATE DATABASE IF NOT EXISTS `hbfitess_blog_db`
-    DEFAULT CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
-
-USE `hbfitess_blog_db`;
-
--- ----------------------------------------------------------------------------
--- Minimal Standalone Users Table (Supporting infrastructure ONLY)
--- IMPORTANT FOR FUTURE INTEGRATION:
--- Do NOT import this table over the team's shared User Management `users` table.
--- Supports the 3 HB Fitness roles: admin, user, coach.
--- ----------------------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS `users` (
-    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-    `full_name` VARCHAR(120) NOT NULL,
-    `email` VARCHAR(150) NOT NULL,
-    `password_hash` VARCHAR(255) NOT NULL,
-    `role` ENUM('admin', 'user', 'coach') NOT NULL DEFAULT 'user',
-    `status` ENUM('active', 'suspended') NOT NULL DEFAULT 'active',
-    `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (`id`),
-    UNIQUE KEY `uk_users_email` (`email`),
-    KEY `idx_users_role` (`role`),
-    KEY `idx_users_status` (`status`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ----------------------------------------------------------------------------
 -- Entity 1: Article (HB Fitness Validation Deck, Page 11)
--- Relationships:
---   User 1 — N Article (articles.author_id -> users.id)
---   Article 1 — N Comment (comments.article_id -> articles.id)
---   recipe_id is nullable (Recipe module belongs to another team member)
+-- Foreign Keys:
+--   articles.author_id -> users.id (ON DELETE RESTRICT ON UPDATE CASCADE)
+--   articles.recipe_id -> nullable (prepared for Nutrition / Recipe module)
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `articles` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -56,9 +36,9 @@ CREATE TABLE IF NOT EXISTS `articles` (
 
 -- ----------------------------------------------------------------------------
 -- Entity 2: Comment (HB Fitness Validation Deck, Page 11)
--- Relationships:
---   Article 1 — N Comment (comments.article_id -> articles.id ON DELETE CASCADE)
---   User 1 — N Comment (comments.user_id -> users.id ON DELETE CASCADE)
+-- Foreign Keys:
+--   comments.article_id -> articles.id (ON DELETE CASCADE ON UPDATE CASCADE)
+--   comments.user_id    -> users.id    (ON DELETE CASCADE ON UPDATE CASCADE)
 -- Deleting an Article cascades safely to its Comments without touching Users.
 -- ----------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `comments` (
@@ -78,10 +58,3 @@ CREATE TABLE IF NOT EXISTS `comments` (
         FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
         ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ----------------------------------------------------------------------------
--- NOTE ON INITIAL LOCAL ACCOUNTS:
--- No plaintext passwords are stored in this SQL file.
--- See README.md ("Authentication Setup") for the exact PHP CLI password_hash()
--- and phpMyAdmin INSERT commands to create your local admin, coach, and user accounts.
--- ----------------------------------------------------------------------------

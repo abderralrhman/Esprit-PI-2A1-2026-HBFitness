@@ -1,26 +1,40 @@
 <?php
 declare(strict_types=1);
 
-require_once __DIR__ . '/../config/database.php';
-require_once __DIR__ . '/../Models/Comment.php';
-require_once __DIR__ . '/AuthController.php';
+require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../Models/Blog/Comment.php';
+require_once __DIR__ . '/BlogAuthAdapter.php';
 
 /**
- * Controllers/CommentController.php
+ * Controllers/Blog/CommentController.php
  * Complete Comment CRUD + SQL JOINs (Comment JOIN User, Article JOIN Comment JOIN User)
- * Enforces 3-Role Permissions:
+ * Enforces 3-Role Permissions via BlogAuthAdapter (shared auth compatible):
  *   - Admin: moderate (edit/delete) all comments
  *   - User & Coach: create comments, edit/delete ONLY their own comments
  */
 class CommentController
 {
     private PDO $db;
-    private AuthController $auth;
+    private BlogAuthAdapter $auth;
+    private ?bool $usesNormalizedRolesTable = null;
 
-    public function __construct(?AuthController $auth = null)
+    public function __construct(?BlogAuthAdapter $auth = null)
     {
         $this->db   = Database::getConnexion();
-        $this->auth = $auth ?? new AuthController();
+        $this->auth = $auth ?? new BlogAuthAdapter();
+    }
+
+    private function usesNormalizedRoles(): bool
+    {
+        if ($this->usesNormalizedRolesTable === null) {
+            try {
+                $stmt = $this->db->query("SHOW COLUMNS FROM users LIKE 'role_id'");
+                $this->usesNormalizedRolesTable = (bool)$stmt->fetch();
+            } catch (PDOException $e) {
+                $this->usesNormalizedRolesTable = false;
+            }
+        }
+        return $this->usesNormalizedRolesTable;
     }
 
     // =========================================================================
@@ -36,17 +50,21 @@ class CommentController
         if ($articleId <= 0) {
             return [];
         }
-        $sql = '
+        $roleSelect = $this->usesNormalizedRoles() ? "COALESCE(r.name, 'user')" : 'u.role';
+        $roleJoin   = $this->usesNormalizedRoles() ? 'LEFT JOIN roles r ON u.role_id = r.id' : '';
+
+        $sql = "
             SELECT c.id, c.content, c.created_at, c.article_id, c.user_id,
                    u.full_name AS author_name,
-                   u.role AS author_role,
+                   {$roleSelect} AS author_role,
                    a.title AS article_title
             FROM comments c
             INNER JOIN users u ON c.user_id = u.id
+            {$roleJoin}
             INNER JOIN articles a ON c.article_id = a.id
             WHERE c.article_id = :article_id
             ORDER BY c.created_at ASC, c.id ASC
-        ';
+        ";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['article_id' => $articleId]);
         return array_map(static fn(array $row): Comment => Comment::fromArray($row), $stmt->fetchAll());
@@ -58,16 +76,20 @@ class CommentController
      */
     public function getAllComments(string $search = '', ?int $articleId = null): array
     {
-        $sql = '
+        $roleSelect = $this->usesNormalizedRoles() ? "COALESCE(r.name, 'user')" : 'u.role';
+        $roleJoin   = $this->usesNormalizedRoles() ? 'LEFT JOIN roles r ON u.role_id = r.id' : '';
+
+        $sql = "
             SELECT c.id, c.content, c.created_at, c.article_id, c.user_id,
                    u.full_name AS author_name,
-                   u.role AS author_role,
+                   {$roleSelect} AS author_role,
                    a.title AS article_title
             FROM comments c
             INNER JOIN articles a ON c.article_id = a.id
             INNER JOIN users u ON c.user_id = u.id
+            {$roleJoin}
             WHERE 1 = 1
-        ';
+        ";
         $params = [];
 
         $search = trim($search);
@@ -98,17 +120,21 @@ class CommentController
         if ($userId <= 0) {
             return [];
         }
-        $sql = '
+        $roleSelect = $this->usesNormalizedRoles() ? "COALESCE(r.name, 'user')" : 'u.role';
+        $roleJoin   = $this->usesNormalizedRoles() ? 'LEFT JOIN roles r ON u.role_id = r.id' : '';
+
+        $sql = "
             SELECT c.id, c.content, c.created_at, c.article_id, c.user_id,
                    u.full_name AS author_name,
-                   u.role AS author_role,
+                   {$roleSelect} AS author_role,
                    a.title AS article_title
             FROM comments c
             INNER JOIN articles a ON c.article_id = a.id
             INNER JOIN users u ON c.user_id = u.id
+            {$roleJoin}
             WHERE c.user_id = :user_id
             ORDER BY c.created_at DESC, c.id DESC
-        ';
+        ";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['user_id' => $userId]);
         return array_map(static fn(array $row): Comment => Comment::fromArray($row), $stmt->fetchAll());
@@ -119,17 +145,21 @@ class CommentController
         if ($id <= 0) {
             return null;
         }
-        $sql = '
+        $roleSelect = $this->usesNormalizedRoles() ? "COALESCE(r.name, 'user')" : 'u.role';
+        $roleJoin   = $this->usesNormalizedRoles() ? 'LEFT JOIN roles r ON u.role_id = r.id' : '';
+
+        $sql = "
             SELECT c.id, c.content, c.created_at, c.article_id, c.user_id,
                    u.full_name AS author_name,
-                   u.role AS author_role,
+                   {$roleSelect} AS author_role,
                    a.title AS article_title
             FROM comments c
             INNER JOIN articles a ON c.article_id = a.id
             INNER JOIN users u ON c.user_id = u.id
+            {$roleJoin}
             WHERE c.id = :id
             LIMIT 1
-        ';
+        ";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['id' => $id]);
         $row = $stmt->fetch();

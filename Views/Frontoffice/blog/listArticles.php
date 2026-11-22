@@ -136,4 +136,4 @@ ob_start();
 </section>
 <?php
 $content = (string)ob_get_clean();
-require __DIR__ . '/../layout.php';
+require __DIR__ . '/../../layout.php';
