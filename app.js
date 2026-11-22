@@ -5,6 +5,7 @@ let currentView = "dashboard";
 let listingFilter = "All";
 let orderFilter = "All";
 let searchTerm = "";
+let orderSearchTerm = "";
 let oldestFirst = false;
 let toastTimer;
 let confirmAction = null;
@@ -189,10 +190,23 @@ function renderListings() {
 }
 
 function renderOrders() {
-  const filtered = orders.filter((order) =>
-    (orderFilter === "All" || order.status === orderFilter) &&
-    matchesSearch([order.id, order.item, order.buyer, order.status])
-  );
+  const filtered = orders.filter((order) => {
+    const needle = orderSearchTerm.trim().toLocaleLowerCase("en");
+    const matchesOrderSearch = !needle || [
+      order.reference,
+      order.id,
+      order.item,
+      order.buyer,
+      order.date,
+      order.dateIso,
+      order.amount,
+      order.status
+    ].some((value) => String(value).toLocaleLowerCase("en").includes(needle));
+
+    return (orderFilter === "All" || order.status === orderFilter) &&
+      matchesOrderSearch &&
+      matchesSearch([order.id, order.item, order.buyer, order.status]);
+  });
   document.getElementById("all-orders").innerHTML = filtered.map((order, index) => `
     <tr>
       <td><span class="order-reference">#${escapeHTML(order.reference)}</span></td>
@@ -200,9 +214,13 @@ function renderOrders() {
       <td><span class="seller-cell"><span class="mini-avatar alt-${index % 4}">${escapeHTML(initials(order.buyer))}</span>${escapeHTML(order.buyer)}</span></td>
       <td>${escapeHTML(order.date)}</td><td class="price-cell">${money(order.amount)}</td>
       <td><span class="status ${safeStatusClass(order.status)}">${escapeHTML(order.status)}</span></td>
-      <td><div class="order-actions">${order.status === "Completed" || order.status === "Cancelled" ? `<button type="button" class="order-delete-button" data-order-delete="${escapeHTML(order.id)}">Delete</button>` : `<button type="button" class="order-update-button" data-order-update="${escapeHTML(order.id)}">${order.status === "To process" ? "Ship" : "Complete"}</button><button type="button" class="order-delete-button" data-order-cancel="${escapeHTML(order.id)}">Cancel</button>`}</div></td>
+      <td><div class="order-actions"><button type="button" class="order-update-button" data-order-edit="${escapeHTML(order.id)}">Edit</button>${order.status === "Completed" || order.status === "Cancelled" ? "" : `<button type="button" class="order-update-button" data-order-update="${escapeHTML(order.id)}">${order.status === "To process" ? "Ship" : "Complete"}</button><button type="button" class="order-delete-button" data-order-cancel="${escapeHTML(order.id)}">Cancel</button>`}<button type="button" class="order-delete-button" data-order-delete="${escapeHTML(order.id)}">Delete</button></div></td>
     </tr>`).join("");
   document.getElementById("order-empty").classList.toggle("hidden", filtered.length > 0);
+  const searchCount = document.getElementById("order-search-count");
+  if (searchCount) searchCount.textContent = `${filtered.length} ${filtered.length === 1 ? "result" : "results"}`;
+  const clearButton = document.getElementById("order-search-clear");
+  if (clearButton) clearButton.classList.toggle("visible", orderSearchTerm !== "");
 }
 
 function render() {
@@ -243,15 +261,29 @@ function closeListingModal() {
   document.getElementById("modal-title").textContent = "Create a listing";
 }
 
-function openOrderModal() {
+function openOrderModal(order = null) {
   const form = document.getElementById("order-form");
   const availableListings = listings.filter((listing) => listing.status === "Available");
+  const editableListings = order
+    ? [...availableListings, ...listings.filter((listing) => listing.id === order.listingId)].filter((listing, index, all) => all.findIndex((item) => item.id === listing.id) === index)
+    : availableListings;
   const listingSelect = form.elements.listingId;
-  listingSelect.innerHTML = availableListings.length
-    ? availableListings.map((listing) => `<option value="${listing.id}">${escapeHTML(listing.title)} - ${money(listing.price)}</option>`).join("")
+  listingSelect.innerHTML = editableListings.length
+    ? editableListings.map((listing) => `<option value="${listing.id}">${escapeHTML(listing.title)} - ${money(listing.price)}</option>`).join("")
     : '<option value="">No available listing</option>';
   form.reset();
-  if (listingSelect.options.length) listingSelect.selectedIndex = 0;
+  form.elements.orderId.value = order ? String(order.id) : "";
+  document.querySelector(".create-order-only").classList.toggle("hidden", Boolean(order));
+  document.getElementById("order-modal-title").textContent = order ? "Edit order" : "Create order";
+  document.getElementById("order-submit-button").textContent = order ? "Save changes" : "Create order";
+  if (order) {
+    const matchingListing = [...availableListings, ...listings.filter((listing) => listing.id === order.listingId)].find((listing, index, all) => all.findIndex((item) => item.id === listing.id) === index);
+    if (matchingListing) listingSelect.value = String(matchingListing.id);
+    form.elements.buyerName.value = order.buyer;
+    form.elements.orderStatus.value = order.status;
+  } else if (listingSelect.options.length) {
+    listingSelect.selectedIndex = 0;
+  }
   document.getElementById("order-modal").classList.remove("hidden");
   form.elements.buyerName.focus();
 }
@@ -395,16 +427,22 @@ document.getElementById("order-form").addEventListener("submit", async (event) =
   const listingId = Number(formData.get("listingId"));
   const buyerName = String(formData.get("buyerName") || "").trim();
   const buyerEmail = String(formData.get("buyerEmail") || "").trim();
-  if (!Number.isInteger(listingId) || listingId < 1 || !buyerName || buyerName.length > 100 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(buyerEmail) || buyerEmail.length > 120) {
+  const orderId = String(formData.get("orderId") || "");
+  if (!Number.isInteger(listingId) || listingId < 1 || !buyerName || buyerName.length > 100 || (!orderId && (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(buyerEmail) || buyerEmail.length > 120))) {
     showToast("Select an available listing and enter a valid buyer name and email.");
     return;
   }
   try {
-    await apiRequest("orders", { method: "POST", body: { listingId, buyerName, buyerEmail } });
+    if (orderId) {
+      await apiRequest(`orders&id=${orderId}`, { method: "PATCH", body: { listingId, buyerName, status: String(formData.get("orderStatus") || "") } });
+      showToast("Order updated.");
+    } else {
+      await apiRequest("orders", { method: "POST", body: { listingId, buyerName, buyerEmail } });
+      showToast("Order created.");
+    }
     document.getElementById("order-modal").classList.add("hidden");
     await loadDashboard();
     changeView("orders");
-    showToast("Order created.");
   } catch (error) {
     showToast(error.message);
   }
@@ -498,6 +536,17 @@ document.querySelectorAll("#listing-filters .filter-tab").forEach((button) => bu
   document.querySelectorAll("#listing-filters .filter-tab").forEach((tab) => tab.classList.toggle("active", tab === button));
   renderListings();
 }));
+document.getElementById("order-search").addEventListener("input", (event) => {
+  orderSearchTerm = event.target.value;
+  renderOrders();
+});
+document.getElementById("order-search-clear").addEventListener("click", () => {
+  orderSearchTerm = "";
+  document.getElementById("order-search").value = "";
+  document.getElementById("order-search").focus();
+  renderOrders();
+});
+
 document.querySelectorAll("#order-filters .filter-tab").forEach((button) => button.addEventListener("click", () => {
   orderFilter = button.dataset.filter;
   document.querySelectorAll("#order-filters .filter-tab").forEach((tab) => tab.classList.toggle("active", tab === button));
@@ -505,6 +554,13 @@ document.querySelectorAll("#order-filters .filter-tab").forEach((button) => butt
 }));
 
 document.getElementById("all-orders").addEventListener("click", async (event) => {
+  const editButton = event.target.closest("[data-order-edit]");
+  if (editButton) {
+    const order = orders.find((item) => item.id === Number(editButton.dataset.orderEdit));
+    if (order) openOrderModal(order);
+    return;
+  }
+
   const cancelButton = event.target.closest("[data-order-cancel]");
   if (cancelButton) {
     const order = orders.find((item) => item.id === Number(cancelButton.dataset.orderCancel));
