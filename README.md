@@ -14,6 +14,7 @@
   - [2. Sports Marketplace & Orders](#2-sports-marketplace--orders)
 - [Tech Stack & Architecture](#tech-stack--architecture)
 - [Setup & Installation with XAMPP](#setup--installation-with-xampp)
+- [Demo Data for Testing](#demo-data-for-testing)
 - [Database Configuration](#database-configuration)
 - [Routing & Navigation](#routing--navigation)
 - [Contributors](#contributors)
@@ -116,6 +117,22 @@ HBfitess/
    * **Marketplace Storefront**: `http://localhost/ali%20-%20Copy/index.php?action=store` (or `?page=store`)
    * **Marketplace Admin**: `http://localhost/ali%20-%20Copy/index.php?action=market_admin` (or `?page=admin`)
    * **User Backoffice**: `http://localhost/ali%20-%20Copy/index.php?action=admin_dashboard`
+
+## Demo Data for Testing
+
+After importing the user schema and starting MySQL, populate all modules with local
+test records from a terminal:
+
+```powershell
+C:\xampp\php\php.exe seed_demo_data.php
+```
+
+The CLI-only script is safe to rerun: it reuses its reserved QA accounts and
+avoids duplicating demo plans, articles, comments, sessions, bookings, listings,
+and orders. On the first run, it creates QA admin, coach, and member accounts
+with random passwords and prints those passwords once. Keep them locally; they
+are not stored in the repository. The script also runs the marketplace schema
+and sample-data setup.
 
 ---
 
