@@ -1,0 +1,331 @@
+/* ==========================================================================
+   HB FITNESS — Shared Design System (Esprit 2026-2027)
+   Graphic Charter:
+     Black     : #030303 (Background)
+     Crimson   : #910329 (Logo Red / Primary)
+     Silver    : #B4B4B4 (Logo Grey / Secondary text)
+     Charcoal  : #1A1A1D (Cards / Elevated Surfaces)
+     Coral Red : #E8405E (Accents / Highlights)
+   Typography: Oswald (Headings) | DM Sans (Body)
+   ========================================================================== */
+
+:root {
+    --hb-black: #030303;
+    --hb-crimson: #910329;
+    --hb-silver: #B4B4B4;
+    --hb-charcoal: #1A1A1D;
+    --hb-coral: #E8405E;
+    --hb-surface: #0E0E11;
+    --hb-border: rgba(180, 180, 180, 0.14);
+    --hb-border-accent: rgba(232, 64, 94, 0.45);
+    --hb-gradient: linear-gradient(135deg, #910329 0%, #E8405E 100%);
+    --hb-header-grad: linear-gradient(125deg, #0D0D10 0%, #1A1A1D 55%, #5A0219 100%);
+    --hb-shadow: 0 14px 36px -12px rgba(0, 0, 0, 0.75);
+    --hb-shadow-hover: 0 20px 42px -14px rgba(145, 3, 41, 0.5);
+    --hb-radius: 16px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+    background-color: var(--hb-black);
+    background-image: radial-gradient(circle at 12% 0%, rgba(145, 3, 41, 0.16) 0%, #030303 48%);
+    background-attachment: fixed;
+    color: #FFFFFF;
+    min-height: 100vh;
+    margin: 0;
+}
+
+h1, h2, h3, h4, h5, .font-heading {
+    font-family: 'Oswald', 'Arial Narrow', sans-serif;
+    letter-spacing: 0.02em;
+    color: #FFFFFF;
+}
+
+a {
+    color: var(--hb-coral);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+a:hover {
+    color: #FFFFFF;
+}
+
+.text-silver { color: var(--hb-silver) !important; }
+.text-coral  { color: var(--hb-coral) !important; }
+
+.eyebrow {
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--hb-coral);
+}
+
+/* Cards */
+.hb-card {
+    background: var(--hb-charcoal);
+    border: 1px solid var(--hb-border);
+    border-radius: var(--hb-radius);
+    padding: 1.5rem;
+    box-shadow: var(--hb-shadow);
+    transition: border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.hb-card.hb-card-hover:hover {
+    border-color: var(--hb-coral);
+    transform: translateY(-4px);
+    box-shadow: var(--hb-shadow-hover);
+}
+
+/* Buttons */
+.btn-hb-primary {
+    background: var(--hb-gradient);
+    color: #FFFFFF;
+    border: none;
+    border-radius: 10px;
+    padding: 0.62rem 1.25rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    box-shadow: 0 6px 18px rgba(145, 3, 41, 0.42);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+.btn-hb-primary:hover {
+    color: #FFFFFF;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(232, 64, 94, 0.5);
+}
+
+.btn-hb-outline {
+    background: rgba(26, 26, 29, 0.85);
+    color: #FFFFFF;
+    border: 1.5px solid rgba(232, 64, 94, 0.55);
+    border-radius: 10px;
+    padding: 0.58rem 1.15rem;
+    font-weight: 700;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.btn-hb-outline:hover {
+    background: rgba(232, 64, 94, 0.16);
+    border-color: var(--hb-coral);
+    color: #FFFFFF;
+}
+
+.btn-hb-dark {
+    background: var(--hb-surface);
+    color: var(--hb-silver);
+    border: 1px solid var(--hb-border);
+    border-radius: 10px;
+    padding: 0.58rem 1.15rem;
+    font-weight: 600;
+    font-size: 0.88rem;
+}
+
+.btn-hb-dark:hover {
+    color: #FFFFFF;
+    border-color: var(--hb-coral);
+}
+
+.btn-hb-danger {
+    background: rgba(232, 64, 94, 0.16);
+    color: #FF7C94;
+    border: 1px solid rgba(232, 64, 94, 0.45);
+    border-radius: 10px;
+    font-weight: 700;
+}
+
+.btn-hb-danger:hover {
+    background: var(--hb-crimson);
+    color: #FFFFFF;
+}
+
+/* Form Controls */
+.hb-label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--hb-silver);
+    margin-bottom: 0.4rem;
+}
+
+.form-control.hb-input,
+.form-select.hb-input {
+    background-color: var(--hb-surface);
+    border: 1.5px solid rgba(180, 180, 180, 0.18);
+    color: #FFFFFF;
+    border-radius: 10px;
+    padding: 0.68rem 0.95rem;
+    font-size: 0.92rem;
+}
+
+.form-control.hb-input::placeholder {
+    color: #707078;
+}
+
+.form-control.hb-input:focus,
+.form-select.hb-input:focus {
+    background-color: var(--hb-surface);
+    color: #FFFFFF;
+    border-color: var(--hb-coral);
+    box-shadow: 0 0 0 0.2rem rgba(232, 64, 94, 0.22);
+}
+
+.form-select.hb-input option {
+    background-color: var(--hb-charcoal);
+    color: #FFFFFF;
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+    border-color: var(--hb-coral) !important;
+}
+
+.field-error {
+    color: var(--hb-coral);
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-top: 0.3rem;
+}
+
+/* Badges */
+.hb-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.28rem 0.72rem;
+    border-radius: 999px;
+    font-size: 0.73rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.hb-badge-admin {
+    background: rgba(145, 3, 41, 0.35);
+    color: #FF8FA3;
+    border: 1px solid rgba(232, 64, 94, 0.5);
+}
+
+.hb-badge-coach {
+    background: rgba(232, 64, 94, 0.16);
+    color: var(--hb-coral);
+    border: 1px solid rgba(232, 64, 94, 0.4);
+}
+
+.hb-badge-user {
+    background: rgba(180, 180, 180, 0.14);
+    color: #E5E5E5;
+    border: 1px solid rgba(180, 180, 180, 0.3);
+}
+
+.hb-badge-active {
+    background: rgba(16, 185, 129, 0.16);
+    color: #6EE7B7;
+    border: 1px solid rgba(16, 185, 129, 0.38);
+}
+
+.hb-badge-suspended {
+    background: rgba(232, 64, 94, 0.2);
+    color: #FF7C94;
+    border: 1px solid rgba(232, 64, 94, 0.5);
+}
+
+/* Alerts */
+.hb-alert {
+    padding: 0.9rem 1.1rem;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.65rem;
+}
+
+.hb-alert-error {
+    background: rgba(232, 64, 94, 0.14);
+    border: 1px solid rgba(232, 64, 94, 0.45);
+    color: #FF94A8;
+}
+
+.hb-alert-success {
+    background: rgba(16, 185, 129, 0.14);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #86EFAC;
+}
+
+/* Avatar */
+.hb-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: var(--hb-gradient);
+    color: #FFFFFF;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.hb-avatar-lg {
+    width: 74px;
+    height: 74px;
+    border-radius: 18px;
+    font-size: 1.8rem;
+}
+
+/* Tables */
+.hb-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #E5E5E5;
+}
+
+.hb-table thead th {
+    background: #111114;
+    color: var(--hb-coral);
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid rgba(145, 3, 41, 0.45);
+}
+
+.hb-table tbody td {
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--hb-border);
+    vertical-align: middle;
+}
+
+.hb-table tbody tr:hover {
+    background: rgba(232, 64, 94, 0.06);
+}
+
+/* Password strength bar */
+.strength-track {
+    height: 6px;
+    background: #0D0D10;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-top: 0.4rem;
+}
+
+.strength-bar {
+    height: 100%;
+    width: 0;
+    transition: width 0.3s ease, background-color 0.3s ease;
+}

@@ -1,34 +1,126 @@
-# Atelier Market
+# HB FITNESS — Project Integration (User Management & Marketplace)
 
-A sports marketplace built with PHP/PDO, MySQL, HTML, CSS, and JavaScript using an MVC structure.
+> **Train smart. Reuse more.**
+> Web Technologies 2A Integrated Project (ESPRIT School of Engineering, 2026–2027).
+> Integrated Modules: **User Management & Authentication** + **Sports Equipment Marketplace**.
 
-## Setup with XAMPP
+---
 
-1. Start **Apache** and **MySQL** in the XAMPP Control Panel.
-2. Open phpMyAdmin at `http://localhost/phpmyadmin`.
-3. Import `marketplace_setup.sql`. It creates or updates the `hb_fitness` database and adds demo data.
-4. Open the Back Office at `http://localhost/ali/index.php?page=admin` or the Front Office at `http://localhost/ali/index.php?page=store`.
+## Table of Contents
 
-The default connection uses `127.0.0.1:3306`, database `hb_fitness`, MySQL user `root`, and an empty password, as in a standard XAMPP installation. For other configurations, set the `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, and `DB_PASSWORD` environment variables in Apache.
+- [Overview](#overview)
+- [Integrated Modules](#integrated-modules)
+  - [1. User Management & Security Core](#1-user-management--security-core)
+  - [2. Sports Marketplace & Orders](#2-sports-marketplace--orders)
+- [Tech Stack & Architecture](#tech-stack--architecture)
+- [Setup & Installation with XAMPP](#setup--installation-with-xampp)
+- [Database Configuration](#database-configuration)
+- [Routing & Navigation](#routing--navigation)
+- [Contributors](#contributors)
+- [Academic Context](#academic-context)
 
-## Features
+---
 
-- Dashboard powered by listings, orders, and categories stored in MySQL.
-- Public storefront with search, category filters, item details, and reservations that create orders.
-- Create, update the status of, and delete listings.
-- Track orders through **To process → Shipped → Completed**.
-- Create categories and export orders to CSV.
-- Search and filter listings and orders.
+## Overview
 
-## MVC structure
+**HB FITNESS** is a sustainable fitness platform built following strict ESPRIT MVC guidelines.
+This repository brings together:
+* The **User Management System** (Authentication, User Roles, Backoffice Administration, Secure Sessions).
+* The **Atelier Market** (Sports equipment listings, category filters, interactive order tracking, public storefront).
 
-- `index.php` and `api.php`: application entry points.
-- `Controllers/`: page routing and API request handling.
-- `Models/MarketplaceRepository.php`: PDO-based MySQL access and prepared queries.
-- `Views/admin/` and `Views/front/`: Back Office and Front Office templates.
-- `style.css`, `front-office.css`, and `app.js`: styling and browser interactions.
-- `marketplace_setup.sql`: schema and seed data compatible with the HB Fitness model.
+---
 
-The browser communicates with the PHP API; storefront pages are rendered on the server.
+## Integrated Modules
 
-The included accounts and records are development examples only. This version does not include user authentication or access control; do not expose it to the internet without adding authentication and authorization.
+### 1. User Management & Security Core
+* **Backoffice User Management**: Complete CRUD for accounts with roles (`admin`, `coach`, `user`) and account statuses (`active`, `suspended`).
+* **Frontoffice Experience**: Member registration, email/password login, athlete dashboard, and profile management.
+* **Security Workshop Standard**:
+  * 100% PDO prepared statements.
+  * `password_hash()` and `password_verify()`.
+  * Cryptographic CSRF tokens on all POST requests.
+  * Hardened session cookies (`HttpOnly`, `SameSite=Lax`, strict mode).
+  * HTTP security headers (`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, CSP).
+
+### 2. Sports Marketplace & Orders
+* **Storefront (`?action=store` / `?page=store`)**: Public marketplace to browse fitness gear, filter by categories, search products, and submit reservations.
+* **Market Admin (`?action=market_admin` / `?page=admin`)**: Full dashboard managing listings, tracking order states (`To process` → `Shipped` → `Completed`), category management, and CSV export.
+* **REST API (`api.php`)**: JSON backend powering asynchronous CRUD operations and interactive widgets.
+
+---
+
+## Tech Stack & Architecture
+
+* **Backend**: PHP 8+ (Strict typing, OOP, PDO, Singleton Database connection)
+* **Frontend**: Bootstrap 5.3, Font Awesome 6, Vanilla JS, CSS3
+* **Database**: MySQL / MariaDB (InnoDB, UTF8MB4)
+* **Design Identity**: Black `#030303`, Crimson `#910329`, Charcoal `#1A1A1D`, Coral Red `#E8405E`
+
+### MVC Project Directory Structure
+
+```text
+HBfitess/
+├── config/
+│   └── database.php            # Singleton Database connection (ESPRIT MVC)
+├── Controllers/
+│   ├── AuthController.php      # Authentication, CSRF, sessions, role guards
+│   ├── UserController.php      # User CRUD & SQL JOIN operations
+│   ├── RoleController.php      # Roles & status management
+│   ├── PageController.php      # Marketplace storefront and admin controller
+│   └── ApiController.php       # Marketplace REST API controller
+├── Models/
+│   ├── User.php                # User entity
+│   ├── Role.php                # Role entity
+│   ├── UserStatus.php          # Status entity
+│   └── MarketplaceRepository.php # Marketplace PDO data access
+├── Views/
+│   ├── Frontoffice/            # User frontoffice templates (home, login, register, profile)
+│   ├── Backoffice/             # User backoffice templates (dashboard, users, roles)
+│   ├── front/                  # Marketplace storefront view (store.php)
+│   ├── admin/                  # Marketplace admin dashboard (dashboard.php)
+│   ├── includes/               # Reusable partials (navbar, sidebar, header, footer)
+│   ├── layout.php              # Frontoffice master template
+│   └── layout_admin.php        # Backoffice master template
+├── api.php                     # Marketplace API entry point
+├── db.php                      # Legacy database helper bridge
+├── index.php                   # Unified Front Controller & Router
+├── hbfitess.sql                # User management schema & seed data
+└── marketplace_setup.sql       # Marketplace schema & seed data
+```
+
+---
+
+## Setup & Installation with XAMPP
+
+1. Place the project inside your XAMPP web root:
+   ```text
+   C:\xampp\htdocs\ali - Copy\
+   ```
+2. Start **Apache** and **MySQL** in the XAMPP Control Panel.
+3. Open phpMyAdmin at `http://localhost/phpmyadmin/`.
+4. Import the database schemas:
+   * Import `hbfitess.sql` (Creates `hbfitess_db` with `users`, `roles`, `user_statuses`).
+   * Import `marketplace_setup.sql` (Creates `hb_fitness` with listings, categories, and orders).
+5. Open your browser:
+   * **Homepage & Authentication**: `http://localhost/ali%20-%20Copy/index.php?action=home`
+   * **Marketplace Storefront**: `http://localhost/ali%20-%20Copy/index.php?action=store` (or `?page=store`)
+   * **Marketplace Admin**: `http://localhost/ali%20-%20Copy/index.php?action=market_admin` (or `?page=admin`)
+   * **User Backoffice**: `http://localhost/ali%20-%20Copy/index.php?action=admin_dashboard`
+
+---
+
+## Contributors
+
+* **Abdulrahman** (Team Leader)
+* **Ali** (Marketplace Module)
+* **Sofiane**
+* **Mouadh**
+* **Hanine**
+* **Meriem**
+
+---
+
+## Academic Context
+
+* **Institution**: Esprit School of Engineering – Tunisia
+* **Course**: Web Technologies 2A (Projet Intégré 2026–2027)
