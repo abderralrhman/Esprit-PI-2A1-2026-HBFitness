@@ -194,7 +194,8 @@
     <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div class="modal-heading"><div><span class="eyebrow">CATALOG</span><h2 id="modal-title">Create a listing</h2><p>Add an item to the marketplace.</p></div><button class="close-button" data-close-modal aria-label="Close">×</button></div>
       <form id="listing-form">
-        <label class="form-field">Item name<input name="title" required maxlength="80" placeholder="e.g. Adjustable dumbbells"></label>
+        <input type="hidden" name="listing_id" value="">
+        <label class="form-field">Item name<input name="title" required maxlength="120" placeholder="e.g. Adjustable dumbbells"></label>
         <div class="form-row">
           <label class="form-field">Category<select name="category" required></select></label>
           <label class="form-field">Price (€)<input name="price" type="number" min="0.01" step="0.01" required placeholder="0.00"></label>

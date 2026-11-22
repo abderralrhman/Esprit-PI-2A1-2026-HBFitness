@@ -78,6 +78,13 @@ final class ApiController
         if ($resource === 'listings' && isset($_GET['id']) && $method === 'PATCH') {
             $id = $this->resourceId();
             $data = $this->requestData();
+            if (isset($data['title']) || isset($data['category']) || isset($data['seller']) || isset($data['price']) || isset($data['condition'])) {
+                $listing = $this->validateListingData($data);
+                if (!$this->marketplace->updateListing($id, $listing)) {
+                    $this->respond(['error' => 'Listing not found.'], 404);
+                }
+                $this->respond(['message' => 'Listing updated.']);
+            }
             if (!$this->marketplace->updateListingStatus($id, (string) ($data['status'] ?? ''))) {
                 $this->respond(['error' => 'Listing not found.'], 404);
             }
@@ -91,12 +98,23 @@ final class ApiController
         }
         if ($method === 'POST' && $resource === 'categories') {
             $data = $this->requestData();
-            $name = trim((string) ($data['name'] ?? ''));
-            if ($name === '' || mb_strlen($name) > 60) {
-                $this->respond(['error' => 'Category name is required (up to 60 characters).'], 422);
-            }
+            $name = $this->categoryName($data);
             $id = $this->marketplace->createCategory($name);
             $this->respond(['id' => $id, 'message' => 'Category created.'], 201);
+        }
+        if ($resource === 'categories' && isset($_GET['id']) && $method === 'PATCH') {
+            $data = $this->requestData();
+            $name = $this->categoryName($data);
+            if (!$this->marketplace->updateCategory($this->resourceId(), $name)) {
+                $this->respond(['error' => 'Category not found.'], 404);
+            }
+            $this->respond(['message' => 'Category updated.']);
+        }
+        if ($resource === 'categories' && isset($_GET['id']) && $method === 'DELETE') {
+            if (!$this->marketplace->deleteCategory($this->resourceId())) {
+                $this->respond(['error' => 'Category not found.'], 404);
+            }
+            $this->respond(['message' => 'Category deleted.']);
         }
         if ($resource === 'orders' && isset($_GET['id']) && $method === 'PATCH') {
             $data = $this->requestData();
@@ -104,6 +122,12 @@ final class ApiController
                 $this->respond(['error' => 'Order not found.'], 404);
             }
             $this->respond(['message' => 'Order status updated.']);
+        }
+        if ($resource === 'orders' && isset($_GET['id']) && $method === 'DELETE') {
+            if (!$this->marketplace->deleteOrder($this->resourceId())) {
+                $this->respond(['error' => 'Order not found.'], 404);
+            }
+            $this->respond(['message' => 'Order deleted.']);
         }
 
         if (!in_array($method, ['GET', 'POST', 'PATCH', 'DELETE'], true)) {
@@ -113,6 +137,36 @@ final class ApiController
         if (in_array($resource, ['listings', 'orders'], true) && in_array($method, ['PATCH', 'DELETE'], true) && !isset($_GET['id'])) {
             $this->respond(['error' => 'Invalid resource ID.'], 400);
         }
+    }
+
+    private function validateListingData(array $data): array
+    {
+        $title = trim((string) ($data['title'] ?? ''));
+        $category = trim((string) ($data['category'] ?? ''));
+        $seller = trim((string) ($data['seller'] ?? ''));
+        $condition = trim((string) ($data['condition'] ?? 'Good'));
+        $price = filter_var($data['price'] ?? null, FILTER_VALIDATE_FLOAT);
+
+        if ($title === '' || mb_strlen($title) > 120 || $category === '' || $seller === '' || mb_strlen($seller) > 100) {
+            $this->respond(['error' => 'Enter a title (up to 120 characters), a category, and a seller.'], 422);
+        }
+        if ($price === false || $price <= 0 || $price > 999999.99) {
+            $this->respond(['error' => 'Price must be greater than 0 and less than €1,000,000.'], 422);
+        }
+        if (!in_array($condition, ['Like new', 'Very good', 'Good', 'Needs repair'], true)) {
+            $this->respond(['error' => 'Invalid item condition.'], 422);
+        }
+
+        return compact('title', 'category', 'seller', 'condition', 'price');
+    }
+
+    private function categoryName(array $data): string
+    {
+        $name = trim((string) ($data['name'] ?? ''));
+        if ($name === '' || mb_strlen($name) > 60) {
+            $this->respond(['error' => 'Category name is required (up to 60 characters).'], 422);
+        }
+        return $name;
     }
 
     private function resourceId(): int

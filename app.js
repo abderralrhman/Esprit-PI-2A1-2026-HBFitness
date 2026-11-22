@@ -141,7 +141,7 @@ function renderCategoryRows() {
 
   document.getElementById("category-cards").innerHTML = categories.map((category) => {
     const count = listings.filter((listing) => listing.category === category.name).length;
-    return `<article class="category-card"><div class="category-card-top"><span class="category-emoji">${escapeHTML(category.icon)}</span><span class="category-card-count">${count}</span></div><h3>${escapeHTML(category.label)}</h3><p>${escapeHTML(category.description)}</p></article>`;
+    return `<article class="category-card" data-category-id="${category.id}"><div class="category-card-top"><span class="category-emoji">${escapeHTML(category.icon)}</span><span class="category-card-count">${count}</span></div><h3>${escapeHTML(category.label)}</h3><p>${escapeHTML(category.description)}</p><div class="category-actions"><button type="button" data-category-edit="${category.id}" class="button button-secondary">Edit</button><button type="button" data-category-delete="${category.id}" class="button button-secondary">Delete</button></div></article>`;
   }).join("") + `<div class="category-add-card"><button id="category-add-card-button"><span>+</span>Add a category</button></div>`;
   document.getElementById("category-add-card-button")?.addEventListener("click", addCategory);
 }
@@ -218,6 +218,23 @@ function openListingModal() {
 
 function closeListingModal() {
   document.getElementById("listing-modal").classList.add("hidden");
+  document.querySelector('#listing-form input[name="listing_id"]').value = "";
+  document.getElementById("modal-title").textContent = "Create a listing";
+}
+
+function openListingEdit(listing) {
+  const form = document.getElementById("listing-form");
+  const categorySelect = form.querySelector('select[name="category"]');
+  categorySelect.innerHTML = categories.map((category) => `<option value="${escapeHTML(category.name)}">${escapeHTML(category.label)}</option>`).join("");
+  form.elements.listing_id.value = String(listing.id);
+  form.elements.title.value = listing.title;
+  form.elements.category.value = listing.category;
+  form.elements.price.value = String(listing.price);
+  form.elements.condition.value = listing.condition;
+  form.elements.seller.value = listing.seller;
+  document.getElementById("modal-title").textContent = "Edit listing";
+  document.getElementById("listing-modal").classList.remove("hidden");
+  form.elements.title.focus();
 }
 
 function attachListingActions() {
@@ -225,7 +242,7 @@ function attachListingActions() {
     button.addEventListener("click", () => {
       const listing = listings.find((item) => item.id === Number(button.dataset.listingMenu));
       if (!listing) return;
-      const options = listing.status === "Available" ? ["Mark as sold", "Put on hold", "Delete"] : ["Relist", "Delete"];
+      const options = listing.status === "Available" ? ["Edit", "Mark as sold", "Put on hold", "Delete"] : ["Edit", "Relist", "Delete"];
       const menu = document.createElement("div");
       menu.className = "row-action-menu";
       menu.innerHTML = options.map((option) => `<button type="button">${option}</button>`).join("");
@@ -234,7 +251,12 @@ function attachListingActions() {
       menu.querySelectorAll("button").forEach((optionButton) => optionButton.addEventListener("click", async () => {
         const action = optionButton.textContent;
         try {
+          if (action === "Edit") {
+            openListingEdit(listing);
+            return;
+          }
           if (action === "Delete") {
+            if (!window.confirm(`Delete "${listing.title}"?`)) return;
             await apiRequest(`listings&id=${listing.id}`, { method: "DELETE" });
           } else {
             const status = action === "Mark as sold" ? "Sold" : action === "Put on hold" ? "Pending" : "Available";
@@ -256,6 +278,34 @@ function attachListingActions() {
       setTimeout(() => document.addEventListener("click", dismiss), 0);
     });
   });
+}
+
+async function editCategory(category) {
+  const name = window.prompt("Category name:", category.name);
+  if (!name || !name.trim()) return;
+  const trimmed = name.trim();
+  if (trimmed.length > 60) {
+    showToast("Category name must contain at most 60 characters.");
+    return;
+  }
+  try {
+    await apiRequest(`categories&id=${category.id}`, { method: "PATCH", body: { name: trimmed } });
+    await loadDashboard();
+    showToast("Category updated.");
+  } catch (error) {
+    showToast(error.message);
+  }
+}
+
+async function deleteCategory(category) {
+  if (!window.confirm(`Delete the category "${category.name}"?`)) return;
+  try {
+    await apiRequest(`categories&id=${category.id}`, { method: "DELETE" });
+    await loadDashboard();
+    showToast("Category deleted.");
+  } catch (error) {
+    showToast(error.message);
+  }
 }
 
 async function addCategory() {
@@ -289,6 +339,19 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
+document.getElementById("category-cards").addEventListener("click", (event) => {
+  const editButton = event.target.closest("[data-category-edit]");
+  const deleteButton = event.target.closest("[data-category-delete]");
+  if (editButton) {
+    const category = categories.find((item) => item.id === Number(editButton.dataset.categoryEdit));
+    if (category) editCategory(category);
+  }
+  if (deleteButton) {
+    const category = categories.find((item) => item.id === Number(deleteButton.dataset.categoryDelete));
+    if (category) deleteCategory(category);
+  }
+});
+
 document.getElementById("listing-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   const formData = new FormData(event.currentTarget);
@@ -300,11 +363,20 @@ document.getElementById("listing-form").addEventListener("submit", async (event)
     condition: String(formData.get("condition")),
     status: "Available"
   };
-  if (!listing.title || !listing.seller || !Number.isFinite(listing.price) || listing.price <= 0) {
-    showToast("Check the listing details.");
+  if (!listing.title || listing.title.length > 120 || !listing.seller || listing.seller.length > 100 || !Number.isFinite(listing.price) || listing.price <= 0 || listing.price > 999999.99) {
+    showToast("Check the listing details: title, seller and valid price are required.");
     return;
   }
   try {
+    const listingId = String(formData.get("listing_id") || "");
+    if (listingId) {
+      await apiRequest(`listings&id=${listingId}`, { method: "PATCH", body: listing });
+      closeListingModal();
+      await loadDashboard();
+      changeView("listings");
+      showToast("Listing updated.");
+      return;
+    }
     await apiRequest("listings", { method: "POST", body: listing });
     closeListingModal();
     await loadDashboard();
@@ -330,20 +402,28 @@ document.querySelectorAll("#order-filters .filter-tab").forEach((button) => butt
 document.getElementById("all-orders").addEventListener("click", async (event) => {
   const button = event.target.closest("[data-order-action]");
   if (!button) return;
-  const order = orders.find((item) => item.id === button.dataset.orderAction);
+  const order = orders.find((item) => item.id === Number(button.dataset.orderAction));
   if (!order) return;
   const status = order.status === "To process" ? "Shipped" : order.status === "Shipped" ? "Completed" : null;
-  if (!status) {
-    showToast("This order is already complete.");
+  if (status) {
+    try {
+      await apiRequest(`orders&id=${order.id}`, { method: "PATCH", body: { status } });
+      await loadDashboard();
+      showToast(`Order ${order.reference} updated: ${status.toLowerCase()}.`);
+    } catch (error) {
+      console.error("Unable to update order.", error);
+      showToast(error.message);
+    }
     return;
   }
-  try {
-    await apiRequest(`orders&id=${order.id}`, { method: "PATCH", body: { status } });
-    await loadDashboard();
-    showToast(`Order ${order.reference} updated: ${status.toLowerCase()}.`);
-  } catch (error) {
-    console.error("Unable to update order.", error);
-    showToast(error.message);
+  if (window.confirm(`Delete order ${order.reference}?`)) {
+    try {
+      await apiRequest(`orders&id=${order.id}`, { method: "DELETE" });
+      await loadDashboard();
+      showToast("Order deleted.");
+    } catch (error) {
+      showToast(error.message);
+    }
   }
 });
 
