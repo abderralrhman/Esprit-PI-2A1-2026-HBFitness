@@ -1,0 +1,188 @@
+/* ============================================================================
+ * HB FITNESS — Blog Model | TailAdmin-Style Backoffice (backoffice.css)
+ * ============================================================================ */
+
+.hb-admin-shell {
+    display: flex;
+    min-height: 100vh;
+    background-color: #08080A;
+}
+
+/* Sidebar */
+.hb-sidebar {
+    width: 268px;
+    flex-shrink: 0;
+    background: linear-gradient(180deg, #101014 0%, #09090B 100%);
+    border-right: 1px solid var(--hb-border);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    z-index: 1040;
+    transition: transform var(--hb-transition);
+}
+
+.hb-sidebar-brand {
+    padding: 1.35rem 1.35rem 1.15rem;
+    border-bottom: 1px solid var(--hb-border);
+}
+
+.hb-sidebar-section {
+    font-size: 0.69rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--hb-muted);
+    padding: 1.1rem 1.35rem 0.45rem;
+}
+
+.hb-sidebar-nav {
+    list-style: none;
+    margin: 0;
+    padding: 0 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.hb-sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 0.9rem;
+    border-radius: 10px;
+    color: var(--hb-silver);
+    font-weight: 500;
+    font-size: 0.92rem;
+    transition: all 0.2s ease;
+}
+
+.hb-sidebar-link i {
+    width: 20px;
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--hb-muted);
+    transition: color 0.2s ease;
+}
+
+.hb-sidebar-link:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+.hb-sidebar-link:hover i {
+    color: var(--hb-coral);
+}
+
+.hb-sidebar-link.active {
+    background: linear-gradient(90deg, rgba(145, 3, 41, 0.35), rgba(232, 64, 94, 0.14));
+    border: 1px solid rgba(232, 64, 94, 0.35);
+    color: #fff;
+}
+
+.hb-sidebar-link.active i {
+    color: var(--hb-coral);
+}
+
+.hb-sidebar-footer {
+    margin-top: auto;
+    padding: 1rem 1.15rem;
+    border-top: 1px solid var(--hb-border);
+}
+
+/* Main Content Area */
+.hb-admin-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Top Header */
+.hb-admin-header {
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+    background: rgba(12, 12, 15, 0.88);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--hb-border);
+    padding: 0.85rem 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.hb-admin-body {
+    padding: 1.75rem;
+    flex: 1;
+}
+
+/* KPI Stat Cards */
+.hb-stat-card {
+    background: linear-gradient(145deg, #17171B, #101014);
+    border: 1px solid var(--hb-border);
+    border-radius: var(--hb-radius);
+    padding: 1.35rem 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    transition: transform var(--hb-transition), border-color var(--hb-transition);
+}
+
+.hb-stat-card:hover {
+    transform: translateY(-3px);
+    border-color: var(--hb-border-strong);
+}
+
+.hb-stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: rgba(232, 64, 94, 0.14);
+    color: var(--hb-coral);
+    font-size: 1.25rem;
+}
+
+.hb-stat-value {
+    font-family: 'Oswald', sans-serif;
+    font-size: 2rem;
+    line-height: 1.05;
+    color: #fff;
+}
+
+.hb-stat-label {
+    font-size: 0.82rem;
+    color: var(--hb-silver);
+    margin-top: 0.2rem;
+}
+
+.hb-sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 1035;
+}
+
+@media (max-width: 991.98px) {
+    .hb-sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        transform: translateX(-100%);
+    }
+    .hb-sidebar.open {
+        transform: translateX(0);
+    }
+    .hb-sidebar-backdrop.show {
+        display: block;
+    }
+    .hb-admin-body {
+        padding: 1.15rem;
+    }
+}

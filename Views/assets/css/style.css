@@ -1,0 +1,283 @@
+/* ============================================================================
+ * HB FITNESS — Blog Model | Shared Design System (style.css)
+ * Palette: Black #030303 | Crimson #910329 | Silver #B4B4B4
+ *          Charcoal #1A1A1D | Coral Red #E8405E
+ * Fonts:   Oswald (Headings / Display) + DM Sans (Body / UI)
+ * ============================================================================ */
+
+:root {
+    --hb-black: #030303;
+    --hb-obsidian: #0A0A0C;
+    --hb-charcoal: #1A1A1D;
+    --hb-surface: #141417;
+    --hb-surface-hover: #1E1E24;
+    --hb-crimson: #910329;
+    --hb-crimson-dark: #6D021F;
+    --hb-coral: #E8405E;
+    --hb-coral-glow: rgba(232, 64, 94, 0.35);
+    --hb-silver: #B4B4B4;
+    --hb-muted: #7C7C86;
+    --hb-white: #F5F5F7;
+    --hb-border: rgba(255, 255, 255, 0.08);
+    --hb-border-strong: rgba(232, 64, 94, 0.32);
+    --hb-radius: 14px;
+    --hb-radius-sm: 9px;
+    --hb-transition: 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin: 0;
+    background-color: var(--hb-black);
+    color: var(--hb-white);
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, h5, h6, .font-display {
+    font-family: 'Oswald', sans-serif;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--hb-white);
+}
+
+a {
+    color: var(--hb-coral);
+    text-decoration: none;
+    transition: color var(--hb-transition);
+}
+
+a:hover {
+    color: #ff6b86;
+}
+
+.text-silver { color: var(--hb-silver) !important; }
+.text-muted-hb { color: var(--hb-muted) !important; }
+.text-coral { color: var(--hb-coral) !important; }
+.text-crimson { color: var(--hb-crimson) !important; }
+
+/* Cards */
+.hb-card {
+    background: linear-gradient(180deg, rgba(26, 26, 29, 0.92), rgba(16, 16, 19, 0.96));
+    border: 1px solid var(--hb-border);
+    border-radius: var(--hb-radius);
+    padding: 1.5rem;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    transition: transform var(--hb-transition), border-color var(--hb-transition), box-shadow var(--hb-transition);
+}
+
+.hb-card-interactive:hover {
+    transform: translateY(-4px);
+    border-color: var(--hb-border-strong);
+    box-shadow: 0 18px 42px rgba(145, 3, 41, 0.22);
+}
+
+/* Buttons */
+.btn-hb-primary {
+    background: linear-gradient(135deg, var(--hb-crimson), var(--hb-coral));
+    color: #fff !important;
+    border: none;
+    border-radius: var(--hb-radius-sm);
+    font-weight: 600;
+    padding: 0.62rem 1.35rem;
+    transition: transform var(--hb-transition), box-shadow var(--hb-transition), filter var(--hb-transition);
+    box-shadow: 0 6px 20px rgba(145, 3, 41, 0.35);
+}
+
+.btn-hb-primary:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.08);
+    box-shadow: 0 10px 26px rgba(232, 64, 94, 0.45);
+}
+
+.btn-hb-outline {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--hb-white) !important;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: var(--hb-radius-sm);
+    font-weight: 500;
+    padding: 0.6rem 1.25rem;
+    transition: all var(--hb-transition);
+}
+
+.btn-hb-outline:hover {
+    background: rgba(232, 64, 94, 0.12);
+    border-color: var(--hb-coral);
+    color: #fff !important;
+    transform: translateY(-1px);
+}
+
+.btn-hb-danger {
+    background: rgba(220, 38, 38, 0.16);
+    color: #fca5a5 !important;
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    border-radius: var(--hb-radius-sm);
+    font-weight: 600;
+    padding: 0.55rem 1.15rem;
+    transition: all var(--hb-transition);
+}
+
+.btn-hb-danger:hover {
+    background: #dc2626;
+    border-color: #dc2626;
+    color: #fff !important;
+}
+
+/* Role Badges (admin / coach / user) */
+.hb-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.hb-badge-admin {
+    background: rgba(232, 64, 94, 0.18);
+    color: #ff7a92;
+    border: 1px solid rgba(232, 64, 94, 0.45);
+}
+
+.hb-badge-coach {
+    background: rgba(245, 158, 11, 0.16);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.42);
+}
+
+.hb-badge-user {
+    background: rgba(180, 180, 180, 0.14);
+    color: #d4d4d8;
+    border: 1px solid rgba(180, 180, 180, 0.32);
+}
+
+.hb-badge-recipe {
+    background: rgba(16, 185, 129, 0.14);
+    color: #34d399;
+    border: 1px solid rgba(16, 185, 129, 0.38);
+}
+
+/* Form Controls */
+.hb-input,
+.hb-select,
+.hb-textarea {
+    background-color: #0E0E11 !important;
+    color: var(--hb-white) !important;
+    border: 1px solid rgba(255, 255, 255, 0.14) !important;
+    border-radius: var(--hb-radius-sm) !important;
+    padding: 0.72rem 0.95rem !important;
+    transition: border-color var(--hb-transition), box-shadow var(--hb-transition);
+}
+
+.hb-input::placeholder,
+.hb-textarea::placeholder {
+    color: var(--hb-muted) !important;
+}
+
+.hb-input:focus,
+.hb-select:focus,
+.hb-textarea:focus {
+    border-color: var(--hb-coral) !important;
+    box-shadow: 0 0 0 3px rgba(232, 64, 94, 0.22) !important;
+    outline: none;
+}
+
+.hb-input.is-invalid,
+.hb-textarea.is-invalid {
+    border-color: #ef4444 !important;
+}
+
+.form-label {
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--hb-silver);
+    margin-bottom: 0.42rem;
+}
+
+/* Alerts & Flash Messages */
+.hb-alert {
+    border-radius: var(--hb-radius-sm);
+    padding: 0.9rem 1.15rem;
+    border: 1px solid transparent;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    font-size: 0.94rem;
+}
+
+.hb-alert-success {
+    background: rgba(16, 185, 129, 0.12);
+    border-color: rgba(16, 185, 129, 0.35);
+    color: #6ee7b7;
+}
+
+.hb-alert-error {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.38);
+    color: #fca5a5;
+}
+
+.hb-alert-info {
+    background: rgba(232, 64, 94, 0.11);
+    border-color: rgba(232, 64, 94, 0.32);
+    color: #f9a8b8;
+}
+
+/* Tables */
+.hb-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    color: var(--hb-white);
+}
+
+.hb-table thead th {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--hb-silver);
+    font-family: 'Oswald', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--hb-border);
+}
+
+.hb-table tbody td {
+    padding: 0.95rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    vertical-align: middle;
+}
+
+.hb-table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.hb-table tbody tr:hover {
+    background-color: rgba(232, 64, 94, 0.05);
+}
+
+/* Scroll Reveal */
+.reveal {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1), transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
