@@ -43,6 +43,11 @@ $boActive    = static fn(string $key): string => $currentPage === $key ? 'active
             <i class="fa-solid fa-bag-shopping"></i> View Storefront
         </a>
 
+        <div class="bo-nav-label">Coaching Sessions</div>
+        <a href="index.php?action=<?= $currentUser->getRoleName() === 'admin' ? 'admin_sessions' : 'coach_sessions' ?>" class="bo-nav-link <?= $boActive('admin_sessions') ?>">
+            <i class="fa-solid fa-calendar-plus"></i> Manage Sessions
+        </a>
+
         <div class="bo-nav-label">Navigation</div>
         <a href="index.php?action=dashboard" class="bo-nav-link">
             <i class="fa-solid fa-arrow-up-right-from-square"></i> Frontoffice View

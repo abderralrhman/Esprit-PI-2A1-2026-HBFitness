@@ -35,6 +35,11 @@ $isActive = static fn(string $page): string => $currentPage === $page ? 'active'
                         <i class="fa-solid fa-shop me-1"></i> Marketplace
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link <?= $isActive('sessions') ?>" href="index.php?action=sessions">
+                        <i class="fa-solid fa-person-running me-1"></i> Sessions
+                    </a>
+                </li>
                 <?php if ($currentUser): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= $isActive('dashboard') ?>" href="index.php?action=dashboard">
