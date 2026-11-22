@@ -2,8 +2,8 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/db.php';
-require_once __DIR__ . '/app/Models/MarketplaceRepository.php';
-require_once __DIR__ . '/app/Controllers/PageController.php';
+require_once __DIR__ . '/Models/MarketplaceRepository.php';
+require_once __DIR__ . '/Controllers/PageController.php';
 
 try {
     (new PageController(new MarketplaceRepository(database())))->handle();

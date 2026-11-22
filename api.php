@@ -2,8 +2,8 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/db.php';
-require_once __DIR__ . '/app/Models/MarketplaceRepository.php';
-require_once __DIR__ . '/app/Controllers/ApiController.php';
+require_once __DIR__ . '/Models/MarketplaceRepository.php';
+require_once __DIR__ . '/Controllers/ApiController.php';
 
 try {
     (new ApiController(new MarketplaceRepository(database())))->handle();

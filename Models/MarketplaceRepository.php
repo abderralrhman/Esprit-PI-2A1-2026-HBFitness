@@ -302,6 +302,68 @@ final class MarketplaceRepository
         }
     }
 
+    public function updateOrder(int $id, int $listingId, string $buyerName, string $status): bool
+    {
+        $statuses = [
+            'To process' => 'pending',
+            'Shipped' => 'shipped',
+            'Completed' => 'completed',
+            'Cancelled' => 'cancelled',
+        ];
+        if (!isset($statuses[$status])) {
+            throw new DomainException('Invalid order status.');
+        }
+
+        $this->pdo->beginTransaction();
+        try {
+            $current = $this->pdo->prepare('SELECT listing_id, buyer_id FROM market_order WHERE id = ? FOR UPDATE');
+            $current->execute([$id]);
+            $order = $current->fetch();
+            if ($order === false) {
+                $this->pdo->rollBack();
+                return false;
+            }
+
+            $listing = $this->pdo->prepare('SELECT status FROM listing WHERE id = ?');
+            $listing->execute([$listingId]);
+            $listingStatus = $listing->fetchColumn();
+            if ($listingStatus === false) {
+                throw new DomainException('The selected listing no longer exists.');
+            }
+
+            $oldListingId = (int) $order['listing_id'];
+            if ($listingId !== $oldListingId && $listingStatus !== 'available') {
+                throw new DomainException('The selected listing is not available.');
+            }
+
+            $buyer = $this->pdo->prepare('UPDATE `user` SET full_name = ? WHERE id = ?');
+            $buyer->execute([$buyerName, (int) $order['buyer_id']]);
+
+            $update = $this->pdo->prepare('UPDATE market_order SET listing_id = ?, status = ? WHERE id = ?');
+            $update->execute([$listingId, $statuses[$status], $id]);
+
+            if ($listingId !== $oldListingId) {
+                $this->pdo->prepare("UPDATE listing SET status = 'available' WHERE id = ?")->execute([$oldListingId]);
+            }
+
+            $newListingStatus = [
+                'pending' => 'pending',
+                'shipped' => 'pending',
+                'completed' => 'sold',
+                'cancelled' => 'available',
+            ][$statuses[$status]];
+            $this->pdo->prepare('UPDATE listing SET status = ? WHERE id = ?')->execute([$newListingStatus, $listingId]);
+
+            $this->pdo->commit();
+            return true;
+        } catch (Throwable $error) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $error;
+        }
+    }
+
     public function advanceOrder(int $id, string $nextStatus): bool
     {
         $this->pdo->beginTransaction();
