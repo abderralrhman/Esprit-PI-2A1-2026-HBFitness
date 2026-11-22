@@ -4,6 +4,8 @@ require_once __DIR__ . '/../../controller/article/ArticleController.php';
 
 $currentUser = AuthController::requireLogin();
 $isAdmin     = AuthController::isAdmin();
+$isCoach     = AuthController::isCoach();
+$isStaff     = AuthController::isStaff();
 $articleC    = new ArticleController();
 
 // Handle inline upvote POST
@@ -46,7 +48,7 @@ $articles  = $articleC->listArticles($filterCat !== '' ? $filterCat : null);
         <section class="crud-page-header">
             <div>
                 <div class="breadcrumb-trail">
-                    <a href="../../index.php?page=<?= $isAdmin ? 'admin' : 'user' ?>"><?= $isAdmin ? 'Admin Dashboard' : 'Athlete Hub' ?></a>
+                    <a href="../../index.php?page=<?= $isAdmin ? 'admin' : ($isCoach ? 'coach' : 'user') ?>"><?= $isAdmin ? 'Admin Dashboard' : ($isCoach ? 'Coach Studio' : 'Athlete Hub') ?></a>
                     <span>/</span> <span>Fitness Articles</span>
                     <?php if ($filterCat !== ''): ?>
                         <span>/</span> <span><?= htmlspecialchars($filterCat) ?></span>
@@ -97,7 +99,7 @@ $articles  = $articleC->listArticles($filterCat !== '' ? $filterCat : null);
                     </thead>
                     <tbody>
                         <?php foreach ($articles as $a):
-                            $canEdit = $isAdmin || ((int)$a['user_id'] === (int)$currentUser['id']);
+                            $canEdit = $isStaff || ((int)$a['user_id'] === (int)$currentUser['id']);
                         ?>
                         <tr class="article-row">
                             <td><strong>#<?= (int)$a['id'] ?></strong></td>

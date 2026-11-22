@@ -10,7 +10,7 @@ $articleC    = new ArticleController();
 $id = isset($_GET['id']) ? (int)$_GET['id'] : (int)($_POST['id'] ?? 0);
 $existing = $articleC->getArticleById($id);
 
-if (!$existing || (!$isAdmin && (int)$existing['user_id'] !== (int)$currentUser['id'])) {
+if (!$existing || (!$isStaff && (int)$existing['user_id'] !== (int)$currentUser['id'])) {
     AuthController::flash("Article not found or access denied.", 'error');
     header("Location: listArticles.php");
     exit;

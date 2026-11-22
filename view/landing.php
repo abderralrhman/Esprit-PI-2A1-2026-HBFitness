@@ -30,10 +30,11 @@
             <a href="#articles" class="link">Articles</a>
             <a href="view/sports/sports.php" class="link">Sports</a>
             <?php if ($currentUser): ?>
-                <span class="role-pill <?= $currentUser['role'] === 'admin' ? 'admin' : '' ?>">
-                    <i class="fa-solid fa-user-check"></i> <?= htmlspecialchars($currentUser['full_name']) ?>
+                <span class="role-pill <?= $currentUser['role'] === 'admin' ? 'admin' : ($currentUser['role'] === 'coach' ? 'coach' : '') ?>">
+                    <i class="fa-solid <?= $currentUser['role'] === 'admin' ? 'fa-shield-halved' : ($currentUser['role'] === 'coach' ? 'fa-medal' : 'fa-user-check') ?>"></i>
+                    <?= htmlspecialchars($currentUser['full_name']) ?> (<?= strtoupper(htmlspecialchars($currentUser['role'])) ?>)
                 </span>
-                <a href="index.php?page=<?= $currentUser['role'] === 'admin' ? 'admin' : 'user' ?>" class="btn btn-primary btn-sm">
+                <a href="index.php?page=<?= $currentUser['role'] === 'admin' ? 'admin' : ($currentUser['role'] === 'coach' ? 'coach' : 'user') ?>" class="btn btn-primary btn-sm">
                     <i class="fa-solid fa-gauge-high"></i> My Dashboard
                 </a>
                 <a href="index.php?action=logout" class="btn btn-outline btn-sm" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></a>
@@ -55,7 +56,7 @@
             </p>
             <div class="hero-ctas">
                 <?php if ($currentUser): ?>
-                    <a href="index.php?page=<?= $currentUser['role'] === 'admin' ? 'admin' : 'user' ?>" class="btn btn-primary btn-lg">
+                    <a href="index.php?page=<?= $currentUser['role'] === 'admin' ? 'admin' : ($currentUser['role'] === 'coach' ? 'coach' : 'user') ?>" class="btn btn-primary btn-lg">
                         <i class="fa-solid fa-rocket"></i> Open my dashboard
                     </a>
                 <?php else: ?>

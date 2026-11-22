@@ -126,7 +126,10 @@ class AuthController {
     }
 
     public static function homeFor(array $user): string {
-        return '/index.php?page=' . ($user['role'] === 'admin' ? 'admin' : 'user');
+        $role = $user['role'] ?? 'user';
+        if ($role === 'admin') return '/index.php?page=admin';
+        if ($role === 'coach') return '/index.php?page=coach';
+        return '/index.php?page=user';
     }
 
     public static function flash(string $message, string $type = 'success'): void {

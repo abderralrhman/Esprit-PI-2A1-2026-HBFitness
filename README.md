@@ -58,8 +58,6 @@ Esprit-PI-2A1-2026-HBFitness/
 - Mouaadh Ben Youssef – Events Module
 - Ghabri Ali – Marketplace Module
 - Hanin Aouina – Sessions Module
-- Membership Module – Unassigned (spare)
-- Challenges Module – Unassigned (spare)
 
 ## Academic Context
 
