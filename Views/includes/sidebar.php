@@ -84,6 +84,12 @@ if (is_object($currentUser) && method_exists($currentUser, 'getFullName')) {
         <a href="index.php?action=blog" class="bo-nav-link">
             <i class="fa-solid fa-globe"></i> View Public Blog
         </a>
+        <?php if (is_object($currentUser) && method_exists($currentUser, 'getRoleName') && in_array($currentUser->getRoleName(), ['admin', 'coach'], true)): ?>
+            <div class="bo-nav-label">Coaching Sessions</div>
+            <a href="index.php?action=<?= $currentUser->getRoleName() === 'admin' ? 'admin_sessions' : 'coach_sessions' ?>" class="bo-nav-link <?= $boActive('admin_sessions') ?>">
+                <i class="fa-solid fa-calendar-plus"></i> Manage Sessions
+            </a>
+        <?php endif; ?>
 
         <div class="bo-nav-label">Navigation</div>
         <a href="index.php?action=dashboard" class="bo-nav-link">

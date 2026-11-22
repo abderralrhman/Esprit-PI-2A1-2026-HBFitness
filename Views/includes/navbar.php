@@ -56,6 +56,11 @@ $isBlogActive = in_array($currentPage, ['blog', 'articles', 'my_comments', 'crea
                         <i class="fa-solid fa-dumbbell me-1"></i> Workouts
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link <?= $isActive('sessions') ?>" href="index.php?action=sessions">
+                        <i class="fa-solid fa-person-running me-1"></i> Sessions
+                    </a>
+                </li>
                 <?php if ($navUserRole !== null): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= $isActive('dashboard') ?>" href="index.php?action=dashboard">

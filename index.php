@@ -48,6 +48,7 @@ require_once __DIR__ . '/Controllers/AuthController.php';
 require_once __DIR__ . '/Controllers/UserController.php';
 require_once __DIR__ . '/Controllers/RoleController.php';
 require_once __DIR__ . '/Controllers/WorkoutController.php';
+require_once __DIR__ . '/Controllers/SessionController.php';
 
 // Load Controllers & Repository (Marketplace)
 require_once __DIR__ . '/db.php';
@@ -208,6 +209,58 @@ switch ($action) {
         exit;
 
     // =========================================================================
+    // COACHING SESSION ROUTES
+    // =========================================================================
+    case 'sessions':
+        $currentUser = $authController->getCurrentUser();
+        $sessionRepository = new SessionRepository(Database::getConnexion());
+        $upcoming = $sessionRepository->upcoming();
+        $csrfToken = $authController->getCsrfToken();
+        $currentPage = 'sessions';
+        require __DIR__ . '/Views/Frontoffice/sessions.php';
+        break;
+
+    case 'my_bookings':
+        $currentUser = $authController->requireAuth();
+        $sessionRepository = new SessionRepository(Database::getConnexion());
+        $bookings = $sessionRepository->bookingsForUser($currentUser->getId());
+        $csrfToken = $authController->getCsrfToken();
+        $currentPage = 'sessions';
+        require __DIR__ . '/Views/Frontoffice/bookings.php';
+        break;
+
+    case 'book_session':
+        $currentUser = $authController->requireAuth();
+        if (!$authController->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+            AuthController::flash('Your form has expired. Please try again.', 'error');
+        } else {
+            try {
+                $sessionRepository = new SessionRepository(Database::getConnexion());
+                $sessionRepository->book((int)($_POST['session_id'] ?? 0), $currentUser->getId());
+                AuthController::flash('Your place has been booked successfully.');
+            } catch (DomainException $error) {
+                AuthController::flash($error->getMessage(), 'error');
+            } catch (Throwable $error) {
+                error_log('[Session booking] ' . $error->getMessage());
+                AuthController::flash('The booking could not be completed. Please try again.', 'error');
+            }
+        }
+        header('Location: index.php?action=sessions');
+        exit;
+
+    case 'cancel_booking':
+        $currentUser = $authController->requireAuth();
+        if (!$authController->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+            AuthController::flash('Your form has expired. Please try again.', 'error');
+        } else {
+            $sessionRepository = new SessionRepository(Database::getConnexion());
+            $cancelled = $sessionRepository->cancel((int)($_POST['session_id'] ?? 0), $currentUser->getId());
+            AuthController::flash($cancelled ? 'Your booking has been cancelled.' : 'No active booking was found.', $cancelled ? 'success' : 'error');
+        }
+        header('Location: index.php?action=my_bookings');
+        exit;
+
+    // =========================================================================
     // FRONTOFFICE PROTECTED ROUTES (User / Coach / Admin)
     // =========================================================================
     case 'dashboard':
@@ -252,6 +305,163 @@ switch ($action) {
     // =========================================================================
     // BACKOFFICE PROTECTED ROUTES (Admin ONLY)
     // =========================================================================
+    case 'admin_sessions':
+    case 'coach_sessions':
+        $currentUser = $authController->requireAuth();
+        if (!in_array($currentUser->getRoleName(), ['admin', 'coach'], true)) {
+            http_response_code(403);
+            echo '403 Access Denied';
+            break;
+        }
+        $sessionRepository = new SessionRepository(Database::getConnexion());
+        $sessionController = new SessionController($sessionRepository);
+        $isAdmin = $currentUser->getRoleName() === 'admin';
+        $sessions = $sessionRepository->allSessions($isAdmin ? null : $currentUser->getId());
+        $coaches = $sessionRepository->coaches();
+        $editing = null;
+        $errors = [];
+        $old = ['title' => '', 'mode' => 'in-person', 'start_at' => '', 'duration_min' => 60, 'max_participants' => 20, 'location' => '', 'coach_id' => $currentUser->getId()];
+        $csrfToken = $authController->getCsrfToken();
+        $currentPage = 'admin_sessions';
+        require __DIR__ . '/Views/Backoffice/sessions.php';
+        break;
+
+    case 'admin_create_session':
+    case 'coach_create_session':
+        $currentUser = $authController->requireAuth();
+        if (!in_array($currentUser->getRoleName(), ['admin', 'coach'], true)) {
+            http_response_code(403);
+            echo '403 Access Denied';
+            break;
+        }
+        $sessionRepository = new SessionRepository(Database::getConnexion());
+        $sessionController = new SessionController($sessionRepository);
+        $errors = [];
+        $old = [
+            'title' => trim((string)($_POST['title'] ?? '')),
+            'mode' => (string)($_POST['mode'] ?? 'in-person'),
+            'start_at' => trim((string)($_POST['start_at'] ?? '')),
+            'duration_min' => (int)($_POST['duration_min'] ?? 60),
+            'max_participants' => (int)($_POST['max_participants'] ?? 20),
+            'location' => trim((string)($_POST['location'] ?? '')),
+            'coach_id' => (int)($_POST['coach_id'] ?? $currentUser->getId()),
+        ];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!$authController->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+                $errors['csrf'] = 'Your form has expired. Please try again.';
+            } else {
+                $errors = $sessionController->validate($old);
+                if ($currentUser->getRoleName() !== 'admin' && $old['coach_id'] !== $currentUser->getId()) {
+                    $errors['coach_id'] = 'Coaches can only create sessions assigned to themselves.';
+                }
+                if (empty($errors)) {
+                    $sessionRepository->create($sessionController->normalized($old));
+                    AuthController::flash('Training session created successfully.');
+                    header('Location: index.php?action=' . ($currentUser->getRoleName() === 'admin' ? 'admin_sessions' : 'coach_sessions'));
+                    exit;
+                }
+            }
+        }
+        $isAdmin = $currentUser->getRoleName() === 'admin';
+        $sessions = $sessionRepository->allSessions($isAdmin ? null : $currentUser->getId());
+        $coaches = $sessionRepository->coaches();
+        $editing = null;
+        $csrfToken = $authController->getCsrfToken();
+        $currentPage = 'admin_sessions';
+        require __DIR__ . '/Views/Backoffice/sessions.php';
+        break;
+
+    case 'admin_edit_session':
+    case 'coach_edit_session':
+        $currentUser = $authController->requireAuth();
+        if (!in_array($currentUser->getRoleName(), ['admin', 'coach'], true)) {
+            http_response_code(403);
+            echo '403 Access Denied';
+            break;
+        }
+        $sessionRepository = new SessionRepository(Database::getConnexion());
+        $sessionController = new SessionController($sessionRepository);
+        $editing = $sessionRepository->find((int)($_GET['id'] ?? $_POST['id'] ?? 0));
+        if (!$editing || !$sessionController->updatableFor($currentUser, $editing)) {
+            AuthController::flash('Session not found or access denied.', 'error');
+            header('Location: index.php?action=' . ($currentUser->getRoleName() === 'admin' ? 'admin_sessions' : 'coach_sessions'));
+            exit;
+        }
+        $old = [
+            'title' => $editing->getTitle(),
+            'mode' => $editing->getMode(),
+            'start_at' => str_replace(' ', 'T', substr($editing->getStartAt(), 0, 16)),
+            'duration_min' => $editing->getDurationMin(),
+            'max_participants' => $editing->getMaxParticipants(),
+            'location' => $editing->getLocation(),
+            'coach_id' => $editing->getCoachId(),
+        ];
+        $errors = [];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $old = [
+                'title' => trim((string)($_POST['title'] ?? '')),
+                'mode' => (string)($_POST['mode'] ?? 'in-person'),
+                'start_at' => trim((string)($_POST['start_at'] ?? '')),
+                'duration_min' => (int)($_POST['duration_min'] ?? 0),
+                'max_participants' => (int)($_POST['max_participants'] ?? 0),
+                'location' => trim((string)($_POST['location'] ?? '')),
+                'coach_id' => (int)($_POST['coach_id'] ?? $editing->getCoachId()),
+            ];
+            if (!$authController->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+                $errors['csrf'] = 'Your form has expired. Please try again.';
+            } else {
+                $errors = $sessionController->validate($old);
+                if ($currentUser->getRoleName() !== 'admin' && $old['coach_id'] !== $currentUser->getId()) {
+                    $errors['coach_id'] = 'Coaches can only manage their own sessions.';
+                }
+                if (empty($errors)) {
+                    $sessionRepository->update($editing->getId(), $sessionController->normalized($old));
+                    AuthController::flash('Training session updated successfully.');
+                    header('Location: index.php?action=' . ($currentUser->getRoleName() === 'admin' ? 'admin_sessions' : 'coach_sessions'));
+                    exit;
+                }
+            }
+        }
+        $isAdmin = $currentUser->getRoleName() === 'admin';
+        $sessions = $sessionRepository->allSessions($isAdmin ? null : $currentUser->getId());
+        $coaches = $sessionRepository->coaches();
+        $csrfToken = $authController->getCsrfToken();
+        $currentPage = 'admin_sessions';
+        require __DIR__ . '/Views/Backoffice/sessions.php';
+        break;
+
+    case 'admin_delete_session':
+        $currentUser = $authController->requireRole('admin');
+        if (!$authController->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+            AuthController::flash('Your form has expired. Please try again.', 'error');
+        } else {
+            $sessionRepository = new SessionRepository(Database::getConnexion());
+            $sessionRepository->delete((int)($_POST['id'] ?? 0));
+            AuthController::flash('Training session deleted.');
+        }
+        header('Location: index.php?action=admin_sessions');
+        exit;
+
+    case 'admin_session_bookings':
+    case 'coach_session_bookings':
+        $currentUser = $authController->requireAuth();
+        if (!in_array($currentUser->getRoleName(), ['admin', 'coach'], true)) {
+            http_response_code(403);
+            echo '403 Access Denied';
+            break;
+        }
+        $sessionRepository = new SessionRepository(Database::getConnexion());
+        $session = $sessionRepository->find((int)($_GET['id'] ?? 0));
+        if (!$session || ($currentUser->getRoleName() !== 'admin' && $session->getCoachId() !== $currentUser->getId())) {
+            AuthController::flash('Session not found or access denied.', 'error');
+            header('Location: index.php?action=' . ($currentUser->getRoleName() === 'admin' ? 'admin_sessions' : 'coach_sessions'));
+            exit;
+        }
+        $bookings = $sessionRepository->bookingsForSession($session->getId());
+        $currentPage = 'admin_sessions';
+        require __DIR__ . '/Views/Backoffice/sessionBookings.php';
+        break;
+
     case 'admin':
         // If ?page=admin was requested without specific user action, delegate to Marketplace admin
         if (($_GET['page'] ?? '') === 'admin') {
