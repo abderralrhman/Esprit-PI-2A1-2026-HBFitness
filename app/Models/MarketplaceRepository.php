@@ -185,6 +185,43 @@ final class MarketplaceRepository
         return (bool) $exists->fetchColumn();
     }
 
+    public function updateListing(int $id, array $data): bool
+    {
+        $category = $this->pdo->prepare('SELECT id FROM equipment_category WHERE name = ? LIMIT 1');
+        $category->execute([$data['category']]);
+        $categoryId = $category->fetchColumn();
+        if ($categoryId === false) {
+            throw new DomainException('The selected category no longer exists.');
+        }
+
+        $seller = $this->pdo->prepare('SELECT id FROM `user` WHERE full_name = ? ORDER BY id LIMIT 1');
+        $seller->execute([$data['seller']]);
+        $sellerId = $seller->fetchColumn();
+        if ($sellerId === false) {
+            throw new DomainException('The selected seller no longer exists.');
+        }
+
+        $update = $this->pdo->prepare(
+            'UPDATE listing SET title = ?, price = ?, item_condition = ?, category_id = ?, seller_id = ? WHERE id = ?'
+        );
+        $update->execute([
+            $data['title'],
+            $data['price'],
+            $data['condition'],
+            $categoryId,
+            $sellerId,
+            $id,
+        ]);
+
+        if ($update->rowCount() > 0) {
+            return true;
+        }
+
+        $exists = $this->pdo->prepare('SELECT 1 FROM listing WHERE id = ?');
+        $exists->execute([$id]);
+        return (bool) $exists->fetchColumn();
+    }
+
     public function deleteListing(int $id): bool
     {
         $delete = $this->pdo->prepare('DELETE FROM listing WHERE id = ?');
@@ -205,6 +242,45 @@ final class MarketplaceRepository
         $insert->execute([$name]);
 
         return (int) $this->pdo->lastInsertId();
+    }
+
+    public function updateCategory(int $id, string $name): bool
+    {
+        $existing = $this->pdo->prepare('SELECT 1 FROM equipment_category WHERE LOWER(name) = LOWER(?) AND id <> ? LIMIT 1');
+        $existing->execute([$name, $id]);
+        if ($existing->fetchColumn()) {
+            throw new DomainException('This category already exists.');
+        }
+
+        $update = $this->pdo->prepare('UPDATE equipment_category SET name = ? WHERE id = ?');
+        $update->execute([$name, $id]);
+        if ($update->rowCount() > 0) {
+            return true;
+        }
+
+        $exists = $this->pdo->prepare('SELECT 1 FROM equipment_category WHERE id = ?');
+        $exists->execute([$id]);
+        return (bool) $exists->fetchColumn();
+    }
+
+    public function deleteCategory(int $id): bool
+    {
+        $count = $this->pdo->prepare('SELECT COUNT(*) FROM listing WHERE category_id = ?');
+        $count->execute([$id]);
+        if ((int) $count->fetchColumn() > 0) {
+            throw new DomainException('A category containing listings cannot be deleted.');
+        }
+
+        $delete = $this->pdo->prepare('DELETE FROM equipment_category WHERE id = ?');
+        $delete->execute([$id]);
+        return $delete->rowCount() === 1;
+    }
+
+    public function deleteOrder(int $id): bool
+    {
+        $delete = $this->pdo->prepare('DELETE FROM market_order WHERE id = ?');
+        $delete->execute([$id]);
+        return $delete->rowCount() === 1;
     }
 
     public function advanceOrder(int $id, string $nextStatus): bool
