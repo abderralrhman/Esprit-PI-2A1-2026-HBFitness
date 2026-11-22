@@ -32,6 +32,9 @@
                 <a href="index.php?page=user" class="btn btn-outline">
                     <i class="fa-solid fa-eye"></i> Preview Athlete Portal
                 </a>
+                <a href="view/workout/manage.php" class="btn btn-primary">
+                    <i class="fa-solid fa-dumbbell"></i> Manage Workouts
+                </a>
                 <a href="view/user/manageUsers.php" class="btn btn-green">
                     <i class="fa-solid fa-users-gear"></i> Manage Users
                 </a>

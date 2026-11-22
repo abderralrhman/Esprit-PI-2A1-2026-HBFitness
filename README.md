@@ -8,7 +8,7 @@ HB Fitness is a comprehensive web application for managing fitness activities, n
 
 - **User Management:** user accounts, profiles, and role-based access control.
 - **Nutrition:** healthy recipes and nutritional macros organized by category.
-- **Workout:** structured training plans, exercises, and muscle group tracking.
+- **Workout:** browse plans by training level and fitness goal, follow their exercises, and open exercise videos. Administrators can create and manage plans and exercises.
 - **Events:** community fitness events, capacities, registrations, and official sponsors.
 - **Marketplace:** swap or sell used fitness equipment through listings and orders.
 - **Sessions:** booking of specialized coaching and training sessions.
@@ -76,12 +76,19 @@ git clone https://github.com/abderralrhman/Esprit-PI-2A1-2026-HBFitness.git
 cd Esprit-PI-2A1-2026-HBFitness
 ```
 
-2. Create the database: open phpMyAdmin and import `database/hb_fitness.sql`.
-3. Set your database credentials in `config/database.php` (host, database name, user, password).
-4. Start the server with XAMPP/WAMP, or from the terminal:
+2. Start Apache and MySQL in XAMPP. On first use, the PHP application creates the `fitness_db` database and required tables. No SQL file needs to be imported.
+3. The default XAMPP connection uses `localhost`, database `fitness_db`, username `root`, and an empty password. Update these settings in `config.php` if your local MySQL credentials differ.
+4. Open the project through XAMPP at `http://localhost/Esprit-PI-2A1-2026-HBFitness/`, or start the PHP development server:
 
 ```bash
 php -S localhost:8000
 ```
 
-5. Open `http://localhost:8000` in your browser.
+5. If using the PHP development server, open `http://localhost:8000` in your browser.
+
+## Workout module
+
+- Workout plans are available at `view/workout/plans.php`; visitors can filter by level and goal and review each plan's exercises and optional video links.
+- Administrators can manage plans and exercises at `view/workout/manage.php`.
+- Workout records use the `workout_plans` and `exercises` tables, created by the PHP database configuration on connection.
+- A demo administrator account is available as `admin@fitpulse.tn` with password `password`.

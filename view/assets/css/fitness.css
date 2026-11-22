@@ -1404,6 +1404,186 @@ h1, h2, h3, h4, .card-title, .section-title, .brand-name {
     border-top: 1px solid var(--border-subtle);
 }
 
+.workout-page {
+    padding-bottom: 3rem;
+}
+
+.workout-filter-card,
+.workout-detail-card,
+.workout-form-card,
+.workout-manage-card {
+    margin-bottom: 1.4rem;
+}
+
+.workout-filter-form {
+    display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.workout-filter-form .form-group {
+    flex: 1 1 220px;
+    margin-bottom: 0;
+}
+
+.workout-plan-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.2rem;
+    margin: 1.5rem 0;
+}
+
+.workout-plan-card {
+    background: var(--hb-charcoal);
+    border: 1px solid var(--border-subtle);
+    border-radius: 18px;
+    box-shadow: var(--shadow-card);
+    padding: 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.workout-plan-card h2 {
+    color: var(--white);
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.workout-plan-card .btn {
+    align-self: flex-start;
+    margin-top: auto;
+}
+
+.workout-plan-icon {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 13px;
+    background: rgba(232, 64, 94, 0.16);
+    color: var(--hb-coral);
+    font-size: 1.2rem;
+}
+
+.workout-plan-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.workout-plan-meta,
+.workout-section-heading p {
+    color: var(--hb-silver);
+    font-size: 0.88rem;
+    margin: 0;
+}
+
+.workout-plan-meta i {
+    color: var(--hb-coral);
+    margin-right: 0.35rem;
+}
+
+.workout-section-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+}
+
+.workout-section-heading h2 {
+    color: var(--white);
+    margin: 0.65rem 0 0.25rem;
+}
+
+.workout-subheading {
+    color: var(--hb-coral);
+    margin: 1.2rem 0 0.8rem;
+}
+
+.workout-back-link {
+    display: inline-block;
+    color: var(--hb-silver);
+    text-decoration: none;
+    margin-bottom: 0.4rem;
+}
+
+.workout-back-link:hover {
+    color: var(--white);
+}
+
+.workout-muted {
+    color: var(--hb-silver);
+    font-size: 0.84rem;
+}
+
+.workout-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 2rem;
+    margin: 1.2rem 0;
+    border: 1px dashed rgba(180, 180, 180, 0.3);
+    border-radius: 16px;
+    color: var(--hb-silver);
+    text-align: center;
+}
+
+.workout-empty-state i {
+    color: var(--hb-coral);
+    font-size: 1.35rem;
+}
+
+.workout-empty-state strong {
+    color: var(--white);
+}
+
+.workout-admin-form {
+    margin-top: 0.8rem;
+}
+
+.workout-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin: -0.3rem 0 0.8rem;
+}
+
+.workout-exercise-editor {
+    padding: 0.8rem 0;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.workout-exercise-form {
+    margin-top: 0;
+}
+
+.workout-inline-delete,
+.workout-delete-plan {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.workout-add-exercise {
+    margin-top: 1.1rem;
+    padding: 1rem;
+    background: rgba(13, 13, 16, 0.7);
+    border: 1px solid var(--border-subtle);
+    border-radius: 14px;
+}
+
+.workout-add-exercise h4 {
+    color: var(--white);
+    margin: 0 0 0.7rem;
+}
+
+.workout-delete-plan {
+    margin-top: 1rem;
+}
+
 /* =========================================================
    Sports Showcase View
    ========================================================= */

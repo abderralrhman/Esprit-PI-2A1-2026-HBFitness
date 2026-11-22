@@ -36,6 +36,9 @@ $isCoach    = $cu && ($cu['role'] === 'coach');
             <a href="<?= $basePrefix ?>view/article/listArticles.php" class="nav-btn <?= $activeNav === 'articles' ? 'active' : '' ?>">
                 <i class="fa-solid fa-newspaper"></i> Articles
             </a>
+            <a href="<?= $basePrefix ?>view/workout/manage.php" class="nav-btn <?= $activeNav === 'workout' ? 'active' : '' ?>">
+                <i class="fa-solid fa-dumbbell"></i> Workouts
+            </a>
             <a href="<?= $basePrefix ?>view/article/listComments.php" class="nav-btn <?= $activeNav === 'comments' ? 'active' : '' ?>">
                 <i class="fa-solid fa-comments"></i> Comments
             </a>
@@ -52,6 +55,9 @@ $isCoach    = $cu && ($cu['role'] === 'coach');
             <a href="<?= $basePrefix ?>view/article/listArticles.php" class="nav-btn <?= $activeNav === 'articles' ? 'active' : '' ?>">
                 <i class="fa-solid fa-newspaper"></i> Articles
             </a>
+            <a href="<?= $basePrefix ?>view/workout/plans.php" class="nav-btn <?= $activeNav === 'workout' ? 'active' : '' ?>">
+                <i class="fa-solid fa-dumbbell"></i> Workouts
+            </a>
             <a href="<?= $basePrefix ?>view/article/listComments.php" class="nav-btn <?= $activeNav === 'comments' ? 'active' : '' ?>">
                 <i class="fa-solid fa-comments"></i> Comments
             </a>
@@ -65,6 +71,9 @@ $isCoach    = $cu && ($cu['role'] === 'coach');
             <a href="<?= $basePrefix ?>view/article/listArticles.php" class="nav-btn <?= $activeNav === 'articles' ? 'active' : '' ?>">
                 <i class="fa-solid fa-newspaper"></i> Articles
             </a>
+            <a href="<?= $basePrefix ?>view/workout/plans.php" class="nav-btn <?= $activeNav === 'workout' ? 'active' : '' ?>">
+                <i class="fa-solid fa-dumbbell"></i> Workouts
+            </a>
             <a href="<?= $basePrefix ?>view/article/listComments.php" class="nav-btn <?= $activeNav === 'comments' ? 'active' : '' ?>">
                 <i class="fa-solid fa-comments"></i> Comments
             </a>
@@ -77,6 +86,9 @@ $isCoach    = $cu && ($cu['role'] === 'coach');
             </a>
             <a href="<?= $basePrefix ?>view/sports/sports.php" class="nav-btn <?= $activeNav === 'sports' ? 'active' : '' ?>">
                 <i class="fa-solid fa-person-running"></i> Sports
+            </a>
+            <a href="<?= $basePrefix ?>view/workout/plans.php" class="nav-btn <?= $activeNav === 'workout' ? 'active' : '' ?>">
+                <i class="fa-solid fa-dumbbell"></i> Workouts
             </a>
         <?php endif; ?>
     </nav>
