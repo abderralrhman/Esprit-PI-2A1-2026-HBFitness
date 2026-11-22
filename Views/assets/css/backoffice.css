@@ -1,0 +1,162 @@
+/* ==========================================================================
+   HB FITNESS — Backoffice Styles (TailAdmin-Inspired Dark Sidebar Layout)
+   ========================================================================== */
+
+.bo-wrapper {
+    display: flex;
+    min-height: 100vh;
+}
+
+.bo-sidebar {
+    width: 265px;
+    flex-shrink: 0;
+    background: #0A0A0D;
+    border-right: 1px solid rgba(145, 3, 41, 0.4);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    z-index: 1040;
+    transition: transform 0.25s ease;
+}
+
+.bo-sidebar-brand {
+    padding: 1.35rem 1.4rem;
+    border-bottom: 1px solid var(--hb-border);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.bo-sidebar-nav {
+    padding: 1.1rem 0.85rem;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.bo-nav-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #71717A;
+    padding: 0.65rem 0.85rem 0.35rem;
+}
+
+.bo-nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.7rem 0.95rem;
+    border-radius: 10px;
+    color: var(--hb-silver);
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+    border-left: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.bo-nav-link:hover {
+    background: rgba(232, 64, 94, 0.1);
+    color: #FFFFFF;
+}
+
+.bo-nav-link.active {
+    background: rgba(145, 3, 41, 0.28);
+    color: #FFFFFF;
+    border-left-color: var(--hb-coral);
+}
+
+.bo-nav-link i {
+    width: 18px;
+    text-align: center;
+    color: var(--hb-coral);
+}
+
+.bo-sidebar-footer {
+    padding: 1rem 1.25rem;
+    border-top: 1px solid var(--hb-border);
+    background: #070709;
+}
+
+.bo-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.bo-topbar {
+    background: rgba(10, 10, 13, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--hb-border);
+    padding: 0.95rem 1.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+}
+
+.bo-env-pill {
+    background: rgba(145, 3, 41, 0.35);
+    color: #FF8FA3;
+    border: 1px solid rgba(232, 64, 94, 0.5);
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.bo-content {
+    padding: 1.75rem;
+    flex: 1;
+}
+
+.bo-stat-card {
+    background: var(--hb-charcoal);
+    border: 1px solid var(--hb-border);
+    border-left: 4px solid var(--hb-crimson);
+    border-radius: 16px;
+    padding: 1.25rem 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.bo-stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: rgba(145, 3, 41, 0.22);
+    border: 1px solid rgba(232, 64, 94, 0.35);
+    color: var(--hb-coral);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+}
+
+.bo-footer {
+    border-top: 1px solid var(--hb-border);
+    padding: 1rem 1.75rem;
+    font-size: 0.82rem;
+    color: var(--hb-silver);
+}
+
+@media (max-width: 991.98px) {
+    .bo-sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        transform: translateX(-100%);
+    }
+    .bo-sidebar.open {
+        transform: translateX(0);
+    }
+}
