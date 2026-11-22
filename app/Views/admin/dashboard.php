@@ -148,7 +148,11 @@
                 <button class="filter-tab" data-filter="Pending">Pending</button>
                 <button class="filter-tab" data-filter="Sold">Sold</button>
               </div>
-              <button class="button button-secondary" id="listing-sort">Sort: newest <span>⌄</span></button>
+              <div class="listing-search-actions">
+                <label class="listing-search"><span aria-hidden="true">⌕</span><input id="listing-search" type="search" placeholder="Search listings..." aria-label="Search listings"><button type="button" id="listing-search-clear" aria-label="Clear listing search">×</button></label>
+                <span class="listing-search-count" id="listing-search-count">0 results</span>
+                <label class="listing-sort"><span>Sort</span><select id="listing-sort" aria-label="Sort listings"><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="price-desc">Price: high to low</option><option value="price-asc">Price: low to high</option><option value="title-asc">Title: A to Z</option><option value="title-desc">Title: Z to A</option><option value="seller-asc">Seller: A to Z</option></select></label>
+              </div>
             </div>
             <div class="table-wrap">
               <table>
@@ -188,7 +192,10 @@
         </section>
 
         <section id="categories-view" class="view-panel hidden">
-          <div class="category-page-heading"><div><h2>Catalog categories</h2><p>Organize listings to help customers find the right equipment.</p></div><button class="button button-secondary" id="add-category-button"><span class="plus">+</span> Add category</button></div>
+          <div class="category-page-heading">
+            <div><span class="eyebrow">CATALOG STRUCTURE</span><h2>Catalog categories</h2><p>Organize listings and help customers find the right equipment.</p></div>
+            <div class="category-toolbar"><label class="category-search"><span aria-hidden="true">⌕</span><input id="category-search" type="search" placeholder="Search categories..." aria-label="Search categories"><button type="button" id="category-search-clear" aria-label="Clear category search">×</button></label><span class="category-total" id="category-total">0 categories</span><label class="category-sort"><span>Sort</span><select id="category-sort" aria-label="Sort categories"><option value="name-asc">Name: A to Z</option><option value="name-desc">Name: Z to A</option><option value="count-desc">Listings: high to low</option><option value="count-asc">Listings: low to high</option></select></label><button class="button button-primary" id="add-category-button"><span class="plus">+</span> Add category</button></div>
+          </div>
           <div class="category-cards" id="category-cards"></div>
         </section>
         <footer class="page-footer"><span>© 2026 Atelier Market</span><span>A marketplace for sports enthusiasts <span class="footer-heart">♥</span></span></footer>

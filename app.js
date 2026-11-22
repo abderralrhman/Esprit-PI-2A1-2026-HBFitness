@@ -7,9 +7,12 @@ let orderFilter = "All";
 let searchTerm = "";
 let orderSearchTerm = "";
 let orderSort = "newest";
-let oldestFirst = false;
+let listingSearchTerm = "";
+let listingSort = "newest";
 let toastTimer;
 let confirmAction = null;
+let categorySearchTerm = "";
+let categorySort = "name-asc";
 
 function openConfirm(message, action) {
   confirmAction = action;
@@ -160,10 +163,24 @@ function renderCategoryRows() {
       <span class="category-amount">${category.count}</span>
     </div>`).join("");
 
-  document.getElementById("category-cards").innerHTML = categories.map((category) => {
+  const needle = categorySearchTerm.trim().toLocaleLowerCase("en");
+  const filteredCategories = categories.filter((category) => !needle || [category.name, category.label, category.description].some((value) => String(value).toLocaleLowerCase("en").includes(needle)));
+  filteredCategories.sort((first, second) => {
+    const firstCount = listings.filter((listing) => listing.category === first.name).length;
+    const secondCount = listings.filter((listing) => listing.category === second.name).length;
+    if (categorySort === "name-desc") return String(second.label).localeCompare(String(first.label), "en", { sensitivity: "base" });
+    if (categorySort === "count-desc") return secondCount - firstCount;
+    if (categorySort === "count-asc") return firstCount - secondCount;
+    return String(first.label).localeCompare(String(second.label), "en", { sensitivity: "base" });
+  });
+  const maxCategoryCount = Math.max(1, ...filteredCategories.map((category) => listings.filter((listing) => listing.category === category.name).length));
+  document.getElementById("category-cards").innerHTML = filteredCategories.map((category) => {
     const count = listings.filter((listing) => listing.category === category.name).length;
-    return `<article class="category-card" data-category-id="${category.id}"><div class="category-card-top"><span class="category-emoji">${escapeHTML(category.icon)}</span><span class="category-card-count">${count}</span></div><h3>${escapeHTML(category.label)}</h3><p>${escapeHTML(category.description)}</p><div class="category-actions"><button type="button" data-category-edit="${category.id}" class="button button-secondary">Edit</button><button type="button" data-category-delete="${category.id}" class="button button-secondary">Delete</button></div></article>`;
-  }).join("") + `<div class="category-add-card"><button id="category-add-card-button"><span>+</span>Add a category</button></div>`;
+    const percent = Math.max(8, count / maxCategoryCount * 100);
+    return `<article class="category-card" data-category-id="${category.id}"><div class="category-card-top"><span class="category-emoji">${escapeHTML(category.icon)}</span><span class="category-card-count"><strong>${count}</strong><small>${count === 1 ? "listing" : "listings"}</small></span></div><h3>${escapeHTML(category.label)}</h3><p>${escapeHTML(category.description)}</p><div class="category-progress"><span style="width:${percent}%"></span></div><div class="category-actions"><button type="button" data-category-edit="${category.id}" class="category-edit-button">Edit</button><button type="button" data-category-delete="${category.id}" class="category-delete-button">Delete</button></div></article>`;
+  }).join("") + `<div class="category-add-card"><button id="category-add-card-button"><span>+</span><strong>Add category</strong><small>Create a new catalog section</small></button></div>`;
+  const total = document.getElementById("category-total");
+  if (total) total.textContent = `${filteredCategories.length} ${filteredCategories.length === 1 ? "category" : "categories"}`;
   document.getElementById("category-add-card-button")?.addEventListener("click", addCategory);
 }
 
@@ -178,15 +195,41 @@ function listingRow(listing, index) {
 }
 
 function renderListings() {
-  const filtered = listings.filter((listing) =>
-    (listingFilter === "All" || listing.status === listingFilter) &&
-    matchesSearch([listing.title, listing.seller, listing.categoryLabel, listing.status])
-  );
-  filtered.sort((a, b) => oldestFirst ? a.date.localeCompare(b.date) : b.date.localeCompare(a.date));
+  const filtered = listings.filter((listing) => {
+    const needle = listingSearchTerm.trim().toLocaleLowerCase("en");
+    const matchesListingSearch = !needle || [
+      listing.id,
+      listing.title,
+      listing.seller,
+      listing.category,
+      listing.categoryLabel,
+      listing.price,
+      listing.condition,
+      listing.status,
+      listing.date
+    ].some((value) => String(value).toLocaleLowerCase("en").includes(needle));
+
+    return (listingFilter === "All" || listing.status === listingFilter) &&
+      matchesListingSearch &&
+      matchesSearch([listing.title, listing.seller, listing.categoryLabel, listing.status]);
+  });
+  filtered.sort((first, second) => {
+    if (listingSort === "oldest") return String(first.date).localeCompare(String(second.date));
+    if (listingSort === "price-desc") return Number(second.price) - Number(first.price);
+    if (listingSort === "price-asc") return Number(first.price) - Number(second.price);
+    if (listingSort === "title-asc") return String(first.title).localeCompare(String(second.title), "en", { sensitivity: "base" });
+    if (listingSort === "title-desc") return String(second.title).localeCompare(String(first.title), "en", { sensitivity: "base" });
+    if (listingSort === "seller-asc") return String(first.seller).localeCompare(String(second.seller), "en", { sensitivity: "base" });
+    return String(second.date).localeCompare(String(first.date));
+  });
   document.getElementById("all-listings").innerHTML = filtered.map(listingRow).join("");
   const recent = [...listings].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 4);
   document.getElementById("recent-listings").innerHTML = recent.map(listingRow).join("");
   document.getElementById("listing-empty").classList.toggle("hidden", filtered.length > 0);
+  const searchCount = document.getElementById("listing-search-count");
+  if (searchCount) searchCount.textContent = `${filtered.length} ${filtered.length === 1 ? "result" : "results"}`;
+  const clearButton = document.getElementById("listing-search-clear");
+  if (clearButton) clearButton.classList.toggle("visible", listingSearchTerm !== "");
   attachListingActions();
 }
 
@@ -462,6 +505,23 @@ document.querySelectorAll("[data-close-order-modal]").forEach((button) => {
   button.addEventListener("click", () => document.getElementById("order-modal").classList.add("hidden"));
 });
 
+document.getElementById("category-search").addEventListener("input", (event) => {
+  categorySearchTerm = event.target.value;
+  document.getElementById("category-search-clear").classList.toggle("visible", categorySearchTerm !== "");
+  renderCategoryRows();
+});
+document.getElementById("category-sort").addEventListener("change", (event) => {
+  categorySort = event.target.value;
+  renderCategoryRows();
+});
+
+document.getElementById("category-search-clear").addEventListener("click", () => {
+  categorySearchTerm = "";
+  document.getElementById("category-search").value = "";
+  document.getElementById("category-search").focus();
+  renderCategoryRows();
+});
+
 document.getElementById("category-cards").addEventListener("click", (event) => {
   const editButton = event.target.closest("[data-category-edit]");
   const deleteButton = event.target.closest("[data-category-delete]");
@@ -539,6 +599,21 @@ document.getElementById("listing-form").addEventListener("submit", async (event)
     console.error("Unable to publish listing.", error);
     showToast(error.message);
   }
+});
+
+document.getElementById("listing-search").addEventListener("input", (event) => {
+  listingSearchTerm = event.target.value;
+  renderListings();
+});
+document.getElementById("listing-search-clear").addEventListener("click", () => {
+  listingSearchTerm = "";
+  document.getElementById("listing-search").value = "";
+  document.getElementById("listing-search").focus();
+  renderListings();
+});
+document.getElementById("listing-sort").addEventListener("change", (event) => {
+  listingSort = event.target.value;
+  renderListings();
 });
 
 document.querySelectorAll("#listing-filters .filter-tab").forEach((button) => button.addEventListener("click", () => {
@@ -658,11 +733,6 @@ document.getElementById("global-search").addEventListener("input", (event) => {
 });
 document.getElementById("mobile-menu").addEventListener("click", () => document.getElementById("sidebar").classList.toggle("open"));
 document.getElementById("add-category-button").addEventListener("click", addCategory);
-document.getElementById("listing-sort").addEventListener("click", (event) => {
-  oldestFirst = !oldestFirst;
-  event.currentTarget.innerHTML = `Sort: ${oldestFirst ? "oldest" : "newest"} <span>⌄</span>`;
-  renderListings();
-});
 document.getElementById("export-orders").addEventListener("click", () => {
   const rows = [["Order", "Item", "Buyer", "Date", "Amount", "Status"], ...orders.map((order) => [order.id, order.item, order.buyer, order.date, order.amount, order.status])];
   const csv = rows.map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(",")).join("\r\n");
