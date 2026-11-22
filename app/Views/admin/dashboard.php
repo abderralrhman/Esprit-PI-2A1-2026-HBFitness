@@ -190,6 +190,18 @@
     </main>
   </div>
 
+  <div class="modal-backdrop hidden" id="confirm-modal" role="presentation">
+    <section class="modal confirm-modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
+      <div class="confirm-icon" aria-hidden="true">×</div>
+      <h2 id="confirm-title">Confirm deletion</h2>
+      <p id="confirm-message">This action cannot be undone.</p>
+      <div class="modal-actions">
+        <button type="button" class="button button-secondary" id="confirm-cancel">Cancel</button>
+        <button type="button" class="button button-danger" id="confirm-delete">Delete</button>
+      </div>
+    </section>
+  </div>
+
   <div class="modal-backdrop hidden" id="listing-modal" role="presentation">
     <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
       <div class="modal-heading"><div><span class="eyebrow">CATALOG</span><h2 id="modal-title">Create a listing</h2><p>Add an item to the marketplace.</p></div><button class="close-button" data-close-modal aria-label="Close">×</button></div>

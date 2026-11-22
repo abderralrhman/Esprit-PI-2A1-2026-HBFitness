@@ -16,6 +16,7 @@
 body { margin: 0; background: var(--page); color: var(--ink); font-size: 13px; }
 button, input, select { font: inherit; }
 button { cursor: pointer; }
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid #e9a3b1; outline-offset: 2px; }
 .app-shell { min-height: 100vh; }
 
 .sidebar {
@@ -166,6 +167,14 @@ th:first-child, td:first-child { padding-left: 3px; }
 .order-delete-button:hover { background: #fff4f3; }
 .category-actions { display: flex; gap: 8px; margin-top: 14px; }
 .category-actions .button { min-height: 32px; flex: 1; }
+.confirm-modal { width: 390px; max-width: calc(100vw - 32px); text-align: center; }
+.confirm-modal .confirm-icon { width: 48px; height: 48px; display: grid; place-items: center; margin: 0 auto 14px; border-radius: 50%; background: #fdebed; color: #c8102e; font-size: 27px; line-height: 1; }
+.confirm-modal h2 { margin: 0 0 8px; font: 700 18px "Manrope", sans-serif; }
+.confirm-modal p { margin: 0 0 22px; color: #7d8982; font-size: 12px; }
+.confirm-modal .modal-actions { justify-content: center; border-top: 0; padding: 0; }
+.confirm-modal .modal-actions .button { min-width: 112px; }
+.button-danger { border-color: #c8102e; background: #c8102e; color: #fff; box-shadow: 0 4px 12px rgba(200,16,46,.18); }
+.button-danger:hover { border-color: #a50f25; background: #a50f25; }
 .row-action-menu { position: absolute; top: 29px; right: 0; z-index: 2; min-width: 142px; padding: 5px; border: 1px solid #e8ece8; border-radius: 8px; background: white; box-shadow: 0 10px 24px rgba(25,40,31,.12); }
 .row-action-menu button { width: 100%; padding: 8px; border: 0; border-radius: 5px; background: white; color: #556159; text-align: left; font-size: 10px; }
 .row-action-menu button:hover { background: #f5f8f5; }
@@ -255,10 +264,23 @@ th:first-child, td:first-child { padding-left: 3px; }
   .category-page-heading { align-items: flex-start; gap: 10px; }
   .category-page-heading p { max-width: 290px; line-height: 1.5; }
   .category-page-heading .button { padding: 0 8px; font-size: 9px; }
+  .listing-actions { flex-wrap: wrap; justify-content: flex-start; }
+  .listing-edit-button, .listing-delete-button { min-height: 30px; }
+  .order-actions { justify-content: flex-start; }
+  .modal { width: calc(100vw - 28px); max-height: calc(100vh - 28px); overflow-y: auto; }
+  .modal-actions { flex-wrap: wrap; }
 }
 @media (max-width: 460px) {
   .global-search { width: 95px; }
   .office-switch { gap: 4px; padding: 0 6px; }
+  .office-switch-label { display: none; }
+  .office-switch-short { display: inline; }
+  .page-heading { flex-direction: column; }
+  .page-heading .button { width: 100%; }
+  .category-cards, .category-list { grid-template-columns: 1fr; }
+  .confirm-modal .modal-actions .button { min-width: 96px; }
+  .listing-actions .row-menu { display: none; }
+}
   .office-switch-label { display: none; }
   .office-switch-short { display: inline; }
   .stats-grid { gap: 9px; }
