@@ -13,7 +13,7 @@ $articles    = $articleC->listArticles();
 $id = isset($_GET['id']) ? (int)$_GET['id'] : (int)($_POST['id'] ?? 0);
 $existing = $commentC->getCommentById($id);
 
-if (!$existing || (!$isAdmin && (int)$existing['user_id'] !== (int)$currentUser['id'])) {
+if (!$existing || (!$isStaff && (int)$existing['user_id'] !== (int)$currentUser['id'])) {
     AuthController::flash("Comment not found or access denied.", 'error');
     header("Location: listComments.php");
     exit;
@@ -22,7 +22,7 @@ if (!$existing || (!$isAdmin && (int)$existing['user_id'] !== (int)$currentUser[
 // Contrôle de saisie PHP (Internal to updateComment.php)
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $articleId   = $isAdmin ? (int)($_POST['article_id'] ?? $existing['article_id']) : (int)$existing['article_id'];
+    $articleId   = $isStaff ? (int)($_POST['article_id'] ?? $existing['article_id']) : (int)$existing['article_id'];
     $content     = trim($_POST['content'] ?? '');
     $isCoachPick = $isStaff ? (isset($_POST['is_coach_pick']) ? 1 : 0) : (int)$existing['is_coach_pick'];
 
@@ -85,7 +85,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
             <form id="formUpdateComment" method="POST" novalidate>
                 <input type="hidden" name="id" value="<?= $id ?>">
-                <?php if ($isAdmin): ?>
+                <?php if ($isStaff): ?>
                 <div class="form-group">
                     <label>Parent Article</label>
                     <select name="article_id" class="form-control">

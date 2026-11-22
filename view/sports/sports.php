@@ -4,6 +4,7 @@ require_once __DIR__ . '/../../controller/article/ArticleController.php';
 
 $currentUser = AuthController::currentUser();
 $isAdmin     = AuthController::isAdmin();
+$isCoach     = AuthController::isCoach();
 $articleC    = new ArticleController();
 $allArticles = $articleC->listArticles();
 
@@ -144,8 +145,8 @@ $sportsCatalog = [
         <section class="crud-page-header">
             <div>
                 <div class="breadcrumb-trail">
-                    <a href="../../index.php?page=<?= $currentUser ? ($isAdmin ? 'admin' : 'user') : 'landing' ?>">
-                        <?= $currentUser ? ($isAdmin ? 'Admin Dashboard' : 'Athlete Hub') : 'Home' ?>
+                    <a href="../../index.php?page=<?= $currentUser ? ($isAdmin ? 'admin' : ($isCoach ? 'coach' : 'user')) : 'landing' ?>">
+                        <?= $currentUser ? ($isAdmin ? 'Admin Dashboard' : ($isCoach ? 'Coach Studio' : 'Athlete Hub')) : 'Home' ?>
                     </a>
                     <span>/</span> <span>Sports Explorer</span>
                 </div>
