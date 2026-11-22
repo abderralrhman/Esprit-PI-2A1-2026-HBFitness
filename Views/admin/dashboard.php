@@ -25,6 +25,7 @@
         <button class="nav-link" data-view="orders"><span class="nav-icon">▧</span>Orders <span class="nav-count" id="order-nav-count">0</span></button>
         <button class="nav-link" data-view="categories"><span class="nav-icon">◈</span>Categories</button>
         <a class="nav-link storefront-link" href="index.php?page=store" aria-label="Switch to Front Office"><span class="nav-icon">↗</span>Front Office</a>
+        <a class="nav-link" href="index.php?action=register" aria-label="Sign Up for an account"><span class="nav-icon">👤</span>Sign Up</a>
       </nav>
 
       <div class="sidebar-bottom">
@@ -53,6 +54,7 @@
             <kbd>⌘ K</kbd>
           </label>
           <a class="office-switch" href="index.php?page=store" aria-label="Switch to Front Office" title="Switch to Front Office"><span class="office-switch-label">Front Office</span><span class="office-switch-short">Front</span><span aria-hidden="true">↗</span></a>
+          <a class="office-switch" href="index.php?action=register" aria-label="Sign Up" title="Sign Up" style="background:#E8405E;border-color:#E8405E;"><span class="office-switch-label"><span aria-hidden="true">+ </span>Sign Up</span><span class="office-switch-short">+</span></a>
           <button class="icon-button notification-button" aria-label="Notifications">♧<i></i></button>
           <span class="avatar avatar-photo top-avatar">SM</span>
         </div>

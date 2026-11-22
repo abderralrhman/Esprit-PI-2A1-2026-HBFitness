@@ -24,8 +24,12 @@ $escape = static fn (mixed $value): string => htmlspecialchars((string) $value, 
     <nav class="store-nav" aria-label="Store navigation">
       <a class="store-nav-active" href="index.php?page=store">Store</a>
       <a href="#categories">Categories</a>
+      <a href="index.php?action=home">Home</a>
     </nav>
-    <a class="store-admin-link" href="index.php?page=admin" aria-label="Switch to Back Office">Back Office <span>↗</span></a>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <a class="store-admin-link" href="index.php?action=register" style="background:#E8405E;border-color:#E8405E;">Sign Up</a>
+      <a class="store-admin-link" href="index.php?page=admin" aria-label="Switch to Back Office">Back Office <span>↗</span></a>
+    </div>
   </header>
 
   <main>
