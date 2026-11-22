@@ -6,6 +6,7 @@ let listingFilter = "All";
 let orderFilter = "All";
 let searchTerm = "";
 let orderSearchTerm = "";
+let orderSort = "newest";
 let oldestFirst = false;
 let toastTimer;
 let confirmAction = null;
@@ -207,6 +208,15 @@ function renderOrders() {
       matchesOrderSearch &&
       matchesSearch([order.id, order.item, order.buyer, order.status]);
   });
+  filtered.sort((first, second) => {
+    if (orderSort === "oldest") return String(first.dateIso).localeCompare(String(second.dateIso));
+    if (orderSort === "amount-desc") return Number(second.amount) - Number(first.amount);
+    if (orderSort === "amount-asc") return Number(first.amount) - Number(second.amount);
+    if (orderSort === "buyer-asc") return String(first.buyer).localeCompare(String(second.buyer), "en", { sensitivity: "base" });
+    if (orderSort === "buyer-desc") return String(second.buyer).localeCompare(String(first.buyer), "en", { sensitivity: "base" });
+    return String(second.dateIso).localeCompare(String(first.dateIso));
+  });
+
   document.getElementById("all-orders").innerHTML = filtered.map((order, index) => `
     <tr>
       <td><span class="order-reference">#${escapeHTML(order.reference)}</span></td>
@@ -540,6 +550,11 @@ document.getElementById("order-search").addEventListener("input", (event) => {
   orderSearchTerm = event.target.value;
   renderOrders();
 });
+document.getElementById("order-sort").addEventListener("change", (event) => {
+  orderSort = event.target.value;
+  renderOrders();
+});
+
 document.getElementById("order-search-clear").addEventListener("click", () => {
   orderSearchTerm = "";
   document.getElementById("order-search").value = "";

@@ -173,6 +173,7 @@
               <div class="order-search-actions">
                 <label class="order-search"><span aria-hidden="true">⌕</span><input id="order-search" type="search" placeholder="Search orders..." aria-label="Search orders"><button type="button" id="order-search-clear" aria-label="Clear order search">×</button></label>
                 <span class="order-search-count" id="order-search-count">5 results</span>
+                <label class="order-sort"><span>Sort</span><select id="order-sort" aria-label="Sort orders"><option value="newest">Newest</option><option value="oldest">Oldest</option><option value="amount-desc">Amount: high to low</option><option value="amount-asc">Amount: low to high</option><option value="buyer-asc">Buyer: A to Z</option><option value="buyer-desc">Buyer: Z to A</option></select></label>
                 <button class="button button-secondary" id="export-orders">↓ Export</button>
               </div>
             </div>
