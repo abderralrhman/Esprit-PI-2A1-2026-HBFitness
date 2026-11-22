@@ -152,7 +152,7 @@ No plaintext demo passwords are stored in this repository.
 
 ## Contributors
 
-- **Abdulrahman** (Team Leader)
+- **Abdulrahman** 
 - **Ali**
 - **Sofiane**
 - **Mouadh**
