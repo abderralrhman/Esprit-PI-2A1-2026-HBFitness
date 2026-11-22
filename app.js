@@ -181,7 +181,7 @@ function renderOrders() {
       <td><span class="seller-cell"><span class="mini-avatar alt-${index % 4}">${escapeHTML(initials(order.buyer))}</span>${escapeHTML(order.buyer)}</span></td>
       <td>${escapeHTML(order.date)}</td><td class="price-cell">${money(order.amount)}</td>
       <td><span class="status ${safeStatusClass(order.status)}">${escapeHTML(order.status)}</span></td>
-      <td><button class="row-menu" data-order-action="${escapeHTML(order.id)}" aria-label="Update order ${escapeHTML(order.id)}">···</button></td>
+      <td><div class="order-actions">${order.status === "Completed" || order.status === "Cancelled" ? `<button type="button" class="order-delete-button" data-order-delete="${escapeHTML(order.id)}">Delete</button>` : `<button type="button" class="order-update-button" data-order-update="${escapeHTML(order.id)}">${order.status === "To process" ? "Ship" : "Complete"}</button>`}</div></td>
     </tr>`).join("");
   document.getElementById("order-empty").classList.toggle("hidden", filtered.length > 0);
 }
@@ -301,21 +301,19 @@ function attachListingActions() {
   });
 }
 
-async function editCategory(category) {
-  const name = window.prompt("Category name:", category.name);
-  if (!name || !name.trim()) return;
-  const trimmed = name.trim();
-  if (trimmed.length > 60) {
-    showToast("Category name must contain at most 60 characters.");
-    return;
-  }
-  try {
-    await apiRequest(`categories&id=${category.id}`, { method: "PATCH", body: { name: trimmed } });
-    await loadDashboard();
-    showToast("Category updated.");
-  } catch (error) {
-    showToast(error.message);
-  }
+function openCategoryModal(category = null) {
+  const modal = document.getElementById("category-modal");
+  const form = document.getElementById("category-form");
+  form.elements.category_id.value = category ? String(category.id) : "";
+  form.elements.name.value = category ? category.name : "";
+  document.getElementById("category-modal-title").textContent = category ? "Edit category" : "Create category";
+  document.querySelector("#category-form button[type='submit']").textContent = category ? "Save changes" : "Add category";
+  modal.classList.remove("hidden");
+  form.elements.name.focus();
+}
+
+function editCategory(category) {
+  openCategoryModal(category);
 }
 
 async function deleteCategory(category) {
@@ -330,20 +328,7 @@ async function deleteCategory(category) {
 }
 
 async function addCategory() {
-  const name = window.prompt("New category name:");
-  if (!name || !name.trim()) return;
-  if (categories.some((category) => category.name.toLocaleLowerCase("en") === name.trim().toLocaleLowerCase("en"))) {
-    showToast("This category already exists.");
-    return;
-  }
-  try {
-    await apiRequest("categories", { method: "POST", body: { name: name.trim() } });
-    await loadDashboard();
-    showToast("Category added to the catalog.");
-  } catch (error) {
-    console.error("Unable to add category.", error);
-    showToast(error.message);
-  }
+  openCategoryModal();
 }
 
 document.querySelectorAll("[data-view]").forEach((button) => button.addEventListener("click", () => changeView(button.dataset.view)));
@@ -373,6 +358,36 @@ document.getElementById("category-cards").addEventListener("click", (event) => {
   }
 });
 
+document.getElementById("category-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const formData = new FormData(event.currentTarget);
+  const categoryId = String(formData.get("category_id") || "");
+  const name = String(formData.get("name") || "").trim();
+  if (!name || name.length > 60 || /[<>]/.test(name)) {
+    showToast("Category name must contain 1 to 60 valid characters.");
+    return;
+  }
+  if (!categoryId && categories.some((category) => category.name.toLocaleLowerCase("en") === name.toLocaleLowerCase("en"))) {
+    showToast("This category already exists.");
+    return;
+  }
+  try {
+    await apiRequest(categoryId ? `categories&id=${categoryId}` : "categories", {
+      method: categoryId ? "PATCH" : "POST",
+      body: { name }
+    });
+    document.getElementById("category-modal").classList.add("hidden");
+    await loadDashboard();
+    showToast(categoryId ? "Category updated." : "Category added to the catalog.");
+  } catch (error) {
+    showToast(error.message);
+  }
+});
+
+document.querySelectorAll("[data-close-category-modal]").forEach((button) => {
+  button.addEventListener("click", () => document.getElementById("category-modal").classList.add("hidden"));
+});
+
 document.getElementById("listing-form").addEventListener("submit", async (event) => {
   event.preventDefault();
   const formData = new FormData(event.currentTarget);
@@ -384,7 +399,7 @@ document.getElementById("listing-form").addEventListener("submit", async (event)
     condition: String(formData.get("condition")),
     status: "Available"
   };
-  if (!listing.title || listing.title.length > 120 || !listing.seller || listing.seller.length > 100 || !Number.isFinite(listing.price) || listing.price <= 0 || listing.price > 999999.99) {
+  if (!listing.title || listing.title.length > 120 || /[<>]/.test(listing.title) || !listing.category || !listing.seller || listing.seller.length > 100 || /[<>]/.test(listing.seller) || !Number.isFinite(listing.price) || listing.price <= 0 || listing.price > 999999.99) {
     showToast("Check the listing details: title, seller and valid price are required.");
     return;
   }
@@ -421,6 +436,36 @@ document.querySelectorAll("#order-filters .filter-tab").forEach((button) => butt
 }));
 
 document.getElementById("all-orders").addEventListener("click", async (event) => {
+  const deleteButton = event.target.closest("[data-order-delete]");
+  if (deleteButton) {
+    const order = orders.find((item) => item.id === Number(deleteButton.dataset.orderDelete));
+    if (!order || !window.confirm(`Delete order ${order.reference}?`)) return;
+    try {
+      await apiRequest(`orders&id=${order.id}`, { method: "DELETE" });
+      await loadDashboard();
+      showToast("Order deleted.");
+    } catch (error) {
+      showToast(error.message);
+    }
+    return;
+  }
+
+  const updateButton = event.target.closest("[data-order-update]");
+  if (updateButton) {
+    const order = orders.find((item) => item.id === Number(updateButton.dataset.orderUpdate));
+    if (!order) return;
+    const status = order.status === "To process" ? "Shipped" : "Completed";
+    try {
+      await apiRequest(`orders&id=${order.id}`, { method: "PATCH", body: { status } });
+      await loadDashboard();
+      showToast(`Order ${order.reference} updated: ${status.toLowerCase()}.`);
+    } catch (error) {
+      showToast(error.message);
+    }
+    return;
+  }
+
+  /* Compatibility with legacy menu markup. */
   const button = event.target.closest("[data-order-action]");
   if (!button) return;
   const order = orders.find((item) => item.id === Number(button.dataset.orderAction));
