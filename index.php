@@ -47,6 +47,7 @@ header(
 require_once __DIR__ . '/Controllers/AuthController.php';
 require_once __DIR__ . '/Controllers/UserController.php';
 require_once __DIR__ . '/Controllers/RoleController.php';
+require_once __DIR__ . '/Controllers/WorkoutController.php';
 
 // Load Controllers & Repository (Marketplace)
 require_once __DIR__ . '/db.php';
@@ -111,6 +112,10 @@ switch ($action) {
         $needsSetup  = AuthController::isLocalhost() && !$authController->hasAnyAdmin();
         $currentPage = 'home';
         require __DIR__ . '/Views/Frontoffice/home.php';
+        break;
+
+    case 'workouts':
+        (new WorkoutController(Database::getConnexion(), $authController))->showPlans();
         break;
 
     case 'setup':
@@ -274,6 +279,10 @@ switch ($action) {
         $statuses    = $roleController->getAllStatuses();
         $currentPage = 'admin_dashboard';
         require __DIR__ . '/Views/Backoffice/dashboard.php';
+        break;
+
+    case 'admin_workouts':
+        (new WorkoutController(Database::getConnexion(), $authController))->managePlans();
         break;
 
     case 'admin_users':

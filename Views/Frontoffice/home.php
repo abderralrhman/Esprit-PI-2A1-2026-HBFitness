@@ -36,6 +36,9 @@ ob_start();
                             <i class="fa-solid fa-right-to-bracket me-2"></i>Log In
                         </a>
                     <?php endif; ?>
+                    <a href="index.php?action=workouts" class="btn btn-hb-outline btn-lg">
+                        <i class="fa-solid fa-dumbbell me-2"></i>Browse Workout Plans
+                    </a>
                 </div>
 
                 <?php if (!empty($needsSetup)): ?>

@@ -27,6 +27,9 @@ $isAdmin  = $roleName === 'admin';
             <a href="index.php?action=edit_profile" class="btn btn-hb-outline">
                 <i class="fa-solid fa-user-pen me-1"></i> Edit Profile
             </a>
+            <a href="index.php?action=workouts" class="btn btn-hb-outline">
+                <i class="fa-solid fa-dumbbell me-1"></i> Browse Workout Plans
+            </a>
             <?php if ($isAdmin): ?>
                 <a href="index.php?action=admin_dashboard" class="btn btn-hb-dark">
                     <i class="fa-solid fa-shield-halved me-1 text-coral"></i> Backoffice

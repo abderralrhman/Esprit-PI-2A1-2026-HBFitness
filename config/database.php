@@ -85,4 +85,42 @@ class Database
     {
         return self::getConnexion();
     }
+
+    public static function ensureWorkoutTables(PDO $pdo): void
+    {
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `workout_plans` (
+                `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                `title` VARCHAR(150) NOT NULL,
+                `level` ENUM('Beginner', 'Intermediate', 'Advanced') NOT NULL,
+                `goal` VARCHAR(80) NOT NULL,
+                `duration_weeks` TINYINT UNSIGNED NOT NULL,
+                `created_by` INT UNSIGNED NOT NULL,
+                `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                KEY `idx_workout_plans_level_goal` (`level`, `goal`),
+                CONSTRAINT `fk_workout_plan_creator`
+                    FOREIGN KEY (`created_by`) REFERENCES `users` (`id`)
+                    ON DELETE CASCADE ON UPDATE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+        $pdo->exec("
+            CREATE TABLE IF NOT EXISTS `exercises` (
+                `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                `name` VARCHAR(150) NOT NULL,
+                `muscle_group` VARCHAR(80) NOT NULL,
+                `sets` TINYINT UNSIGNED NOT NULL,
+                `reps` VARCHAR(40) NOT NULL,
+                `rest_seconds` SMALLINT UNSIGNED NOT NULL DEFAULT 60,
+                `video_url` VARCHAR(500) DEFAULT NULL,
+                `plan_id` INT UNSIGNED NOT NULL,
+                `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (`id`),
+                KEY `idx_exercises_plan_id` (`plan_id`),
+                CONSTRAINT `fk_exercise_plan`
+                    FOREIGN KEY (`plan_id`) REFERENCES `workout_plans` (`id`)
+                    ON DELETE CASCADE ON UPDATE CASCADE
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+    }
 }

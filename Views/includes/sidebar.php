@@ -52,6 +52,14 @@ if (is_object($currentUser) && method_exists($currentUser, 'getFullName')) {
             <i class="fa-solid fa-user-shield"></i> Roles &amp; Statuses
         </a>
 
+        <div class="bo-nav-label">Workout Programs</div>
+        <a href="index.php?action=admin_workouts" class="bo-nav-link <?= $boActive('admin_workouts') ?>">
+            <i class="fa-solid fa-dumbbell"></i> Manage Workouts
+        </a>
+        <a href="index.php?action=workouts" class="bo-nav-link">
+            <i class="fa-solid fa-list"></i> Browse Plans
+        </a>
+
         <div class="bo-nav-label">Marketplace</div>
         <a href="index.php?action=market_admin" class="bo-nav-link <?= $boActive('market_admin') ?>">
             <i class="fa-solid fa-shop"></i> Market Admin

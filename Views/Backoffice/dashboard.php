@@ -46,6 +46,17 @@ ob_start();
     </div>
 </div>
 
+<div class="hb-card d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h2 class="h5 text-uppercase mb-1"><i class="fa-solid fa-dumbbell text-coral me-2"></i>Workout Programs</h2>
+        <p class="text-silver mb-0">Create training plans and manage their exercises.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="index.php?action=workouts" class="btn btn-hb-outline">Browse plans</a>
+        <a href="index.php?action=admin_workouts" class="btn btn-hb-primary">Manage workouts</a>
+    </div>
+</div>
+
 <!-- Role & Status Distribution -->
 <div class="row g-4 mb-4">
     <div class="col-lg-6">

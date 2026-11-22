@@ -27,6 +27,7 @@
 This repository brings together:
 * The **User Management System** (Authentication, User Roles, Backoffice Administration, Secure Sessions).
 * The **Atelier Market** (Sports equipment listings, category filters, interactive order tracking, public storefront).
+* **Workout Programs** (plans filtered by level and goal, detailed exercise lists, and admin plan management).
 
 ---
 
@@ -47,6 +48,11 @@ This repository brings together:
 * **Market Admin (`?action=market_admin` / `?page=admin`)**: Full dashboard managing listings, tracking order states (`To process` → `Shipped` → `Completed`), category management, and CSV export.
 * **REST API (`api.php`)**: JSON backend powering asynchronous CRUD operations and interactive widgets.
 
+### 3. Workout Programs
+* **Plan library (`?action=workouts`)**: Public workout plans filtered by experience level and fitness goal, with exercise lists and optional video links.
+* **Workout administration (`?action=admin_workouts`)**: Administrator-only CRUD for workout plans and their exercises.
+* **PHP-managed schema**: The application creates the `workout_plans` and `exercises` tables in the user database connection; no workout SQL import is required.
+
 ---
 
 ## Tech Stack & Architecture
@@ -66,12 +72,15 @@ HBfitess/
 │   ├── AuthController.php      # Authentication, CSRF, sessions, role guards
 │   ├── UserController.php      # User CRUD & SQL JOIN operations
 │   ├── RoleController.php      # Roles & status management
+│   ├── WorkoutController.php   # Workout plan and exercise CRUD
 │   ├── PageController.php      # Marketplace storefront and admin controller
 │   └── ApiController.php       # Marketplace REST API controller
 ├── Models/
 │   ├── User.php                # User entity
 │   ├── Role.php                # Role entity
 │   ├── UserStatus.php          # Status entity
+│   ├── WorkoutPlan.php         # Workout plan entity
+│   ├── Exercise.php            # Workout exercise entity
 │   └── MarketplaceRepository.php # Marketplace PDO data access
 ├── Views/
 │   ├── Frontoffice/            # User frontoffice templates (home, login, register, profile)
@@ -98,9 +107,10 @@ HBfitess/
    ```
 2. Start **Apache** and **MySQL** in the XAMPP Control Panel.
 3. Open phpMyAdmin at `http://localhost/phpmyadmin/`.
-4. Import the database schemas:
-   * Import `hbfitess.sql` (Creates `hbfitess_db` with `users`, `roles`, `user_statuses`).
-   * Import `marketplace_setup.sql` (Creates `hb_fitness` with listings, categories, and orders).
+4. Import `hbfitess.sql` to create the main `hbfitess_db` user-management database.
+   The Marketplace creates its `hb_fitness` database and required tables in PHP the
+   first time it is opened. The MySQL account configured for the Marketplace must
+   have permission to create databases when `hb_fitness` does not exist.
 5. Open your browser:
    * **Homepage & Authentication**: `http://localhost/ali%20-%20Copy/index.php?action=home`
    * **Marketplace Storefront**: `http://localhost/ali%20-%20Copy/index.php?action=store` (or `?page=store`)

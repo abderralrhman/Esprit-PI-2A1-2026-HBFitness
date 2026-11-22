@@ -131,7 +131,7 @@ final class MarketplaceRepository
             $role->execute(['member']);
             $roleId = $role->fetchColumn();
             if ($roleId === false) {
-                throw new RuntimeException('The member role is missing. Import marketplace_setup.sql.');
+                throw new RuntimeException('The marketplace member role has not been initialized.');
             }
 
             $createSeller = $this->pdo->prepare(
