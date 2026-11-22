@@ -725,6 +725,17 @@
     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
 }
 
+.modal-backdrop > .modal {
+    display: block;
+    position: relative;
+    width: 92%;
+    height: auto;
+    max-height: calc(100vh - 2rem);
+    margin: 0;
+    overflow-y: auto;
+    pointer-events: auto;
+}
+
 .modal-heading {
     display: flex;
     justify-content: space-between;

@@ -18,7 +18,7 @@ $title       = 'Marketplace Admin — HB FITNESS';
 
 ob_start();
 ?>
-<link rel="stylesheet" href="Views/assets/css/market_admin.css?v=1">
+<link rel="stylesheet" href="Views/assets/css/market_admin.css?v=2">
 
 <div class="market-admin-container">
     <!-- Sub-navigation & Actions Toolbar -->
@@ -63,47 +63,48 @@ ob_start();
     <section id="dashboard-view" class="view-panel">
         <!-- KPI Stat Cards -->
         <div class="market-stats-grid">
-            <article class="market-stat-card">
+            <!-- stat-card classes required by app.js renderStats() -->
+            <article class="market-stat-card stat-card">
                 <div class="market-stat-top">
                     <span>Revenue</span>
                     <div class="market-stat-icon"><i class="fa-solid fa-euro-sign"></i></div>
                 </div>
-                <div class="market-stat-value">0 <small style="font-size:1.1rem;color:#B4B4B4;">€</small></div>
-                <div class="market-stat-foot">
+                <div class="market-stat-value stat-value" id="revenue-stat">€0.00</div>
+                <div class="market-stat-foot stat-foot">
                     <span class="trend">0 completed</span> <span>completed orders</span>
                 </div>
             </article>
 
-            <article class="market-stat-card">
+            <article class="market-stat-card stat-card">
                 <div class="market-stat-top">
                     <span>Orders Received</span>
                     <div class="market-stat-icon"><i class="fa-solid fa-cart-arrow-down"></i></div>
                 </div>
-                <div class="market-stat-value" id="orders-stat">0</div>
-                <div class="market-stat-foot">
+                <div class="market-stat-value stat-value" id="orders-stat">0</div>
+                <div class="market-stat-foot stat-foot">
                     <span class="trend">0 orders</span> <span>in total</span>
                 </div>
             </article>
 
-            <article class="market-stat-card">
+            <article class="market-stat-card stat-card">
                 <div class="market-stat-top">
                     <span>Active Listings</span>
                     <div class="market-stat-icon"><i class="fa-solid fa-boxes-packing"></i></div>
                 </div>
-                <div class="market-stat-value" id="active-stat">0</div>
-                <div class="market-stat-foot">
+                <div class="market-stat-value stat-value" id="active-stat">0</div>
+                <div class="market-stat-foot stat-foot">
                     <span class="trend">0 live</span> <span>available to buy</span>
                 </div>
             </article>
 
-            <article class="market-stat-card">
+            <article class="market-stat-card stat-card">
                 <div class="market-stat-top">
                     <span>To Process</span>
                     <div class="market-stat-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
                 </div>
-                <div class="market-stat-value" id="pending-stat">0</div>
-                <div class="market-stat-foot">
-                    <span style="color:#FBBF24;font-weight:600;">Needs attention</span> <span>orders to process</span>
+                <div class="market-stat-value stat-value" id="pending-stat">0</div>
+                <div class="market-stat-foot stat-foot">
+                    <span class="trend" style="color:#FBBF24;font-weight:600;">Needs attention</span> <span>orders to process</span>
                 </div>
             </article>
         </div>
@@ -478,7 +479,7 @@ ob_start();
 <!-- Toast notification -->
 <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
 
-<script src="app.js"></script>
+<script src="app.js?v=3"></script>
 
 <?php
 $content = (string)ob_get_clean();

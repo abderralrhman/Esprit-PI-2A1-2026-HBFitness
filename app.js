@@ -21,14 +21,14 @@ function openConfirm(message, action) {
   document.getElementById("confirm-cancel").focus();
 }
 
-document.getElementById("confirm-cancel").addEventListener("click", () => {
+document.getElementById("confirm-cancel")?.addEventListener("click", () => {
   confirmAction = null;
-  document.getElementById("confirm-modal").classList.add("hidden");
+  document.getElementById("confirm-modal")?.classList.add("hidden");
 });
-document.getElementById("confirm-delete").addEventListener("click", async () => {
+document.getElementById("confirm-delete")?.addEventListener("click", async () => {
   const action = confirmAction;
   confirmAction = null;
-  document.getElementById("confirm-modal").classList.add("hidden");
+  document.getElementById("confirm-modal")?.classList.add("hidden");
   if (action) await action();
 });
 
@@ -59,6 +59,7 @@ async function apiRequest(resource, options = {}) {
   });
   const response = await fetch(`api.php?${query.toString()}`, {
     method: options.method || "GET",
+    cache: "no-store",
     headers: options.body
       ? { "Content-Type": "application/json", "Accept": "application/json" }
       : { "Accept": "application/json" },
@@ -726,14 +727,14 @@ document.getElementById("all-orders").addEventListener("click", async (event) =>
   });
 });
 
-document.getElementById("global-search").addEventListener("input", (event) => {
+document.getElementById("global-search")?.addEventListener("input", (event) => {
   searchTerm = event.target.value;
   renderListings();
   renderOrders();
 });
-document.getElementById("mobile-menu").addEventListener("click", () => document.getElementById("sidebar").classList.toggle("open"));
-document.getElementById("add-category-button").addEventListener("click", addCategory);
-document.getElementById("export-orders").addEventListener("click", () => {
+document.getElementById("mobile-menu")?.addEventListener("click", () => document.getElementById("sidebar")?.classList.toggle("open"));
+document.getElementById("add-category-button")?.addEventListener("click", addCategory);
+document.getElementById("export-orders")?.addEventListener("click", () => {
   const rows = [["Order", "Item", "Buyer", "Date", "Amount", "Status"], ...orders.map((order) => [order.id, order.item, order.buyer, order.date, order.amount, order.status])];
   const csv = rows.map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(",")).join("\r\n");
   const link = document.createElement("a");
@@ -745,5 +746,8 @@ document.getElementById("export-orders").addEventListener("click", () => {
 });
 
 const today = new Date();
-document.getElementById("current-date").textContent = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(today).toLocaleUpperCase("en");
+const currentDateElement = document.getElementById("current-date");
+if (currentDateElement) {
+  currentDateElement.textContent = new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" }).format(today).toLocaleUpperCase("en");
+}
 loadDashboard();
