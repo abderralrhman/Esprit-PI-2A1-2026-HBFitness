@@ -152,7 +152,7 @@ function listingRow(listing, index) {
     <td><span class="seller-cell"><span class="mini-avatar alt-${index % 4}">${escapeHTML(initials(listing.seller))}</span>${escapeHTML(listing.seller)}</span></td>
     <td>${escapeHTML(listing.categoryLabel)}</td><td class="price-cell">${money(listing.price)}</td>
     <td><span class="status ${safeStatusClass(listing.status)}">${escapeHTML(listing.status)}</span></td>
-    <td><div class="action-wrap"><button class="row-menu" data-listing-menu="${listing.id}" aria-label="Actions for ${escapeHTML(listing.title)}">···</button></div></td>
+    <td><div class="listing-actions"><button type="button" class="listing-edit-button" data-listing-edit="${listing.id}">Edit</button><button type="button" class="listing-delete-button" data-listing-delete="${listing.id}">Delete</button><button class="row-menu" data-listing-menu="${listing.id}" aria-label="Actions for ${escapeHTML(listing.title)}">···</button></div></td>
   </tr>`;
 }
 
@@ -238,6 +238,27 @@ function openListingEdit(listing) {
 }
 
 function attachListingActions() {
+  document.querySelectorAll("[data-listing-edit]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const listing = listings.find((item) => item.id === Number(button.dataset.listingEdit));
+      if (listing) openListingEdit(listing);
+    });
+  });
+
+  document.querySelectorAll("[data-listing-delete]").forEach((button) => {
+    button.addEventListener("click", async () => {
+      const listing = listings.find((item) => item.id === Number(button.dataset.listingDelete));
+      if (!listing || !window.confirm(`Delete "${listing.title}"?`)) return;
+      try {
+        await apiRequest(`listings&id=${listing.id}`, { method: "DELETE" });
+        await loadDashboard();
+        showToast("Listing deleted.");
+      } catch (error) {
+        showToast(error.message);
+      }
+    });
+  });
+
   document.querySelectorAll("[data-listing-menu]").forEach((button) => {
     button.addEventListener("click", () => {
       const listing = listings.find((item) => item.id === Number(button.dataset.listingMenu));

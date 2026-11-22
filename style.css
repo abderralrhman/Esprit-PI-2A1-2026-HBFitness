@@ -153,6 +153,11 @@ th:first-child, td:first-child { padding-left: 3px; }
 .row-menu { width: 28px; height: 28px; border: 0; border-radius: 6px; background: transparent; color: #96a19a; font-size: 19px; }
 .row-menu:hover { background: #f4f6f4; color: #4c5a51; }
 .action-wrap { position: relative; }
+.listing-actions { display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+.listing-edit-button, .listing-delete-button { min-height: 28px; padding: 5px 8px; border: 1px solid #e1e6e1; border-radius: 5px; background: #fff; color: #556159; font-size: 10px; cursor: pointer; }
+.listing-edit-button:hover { background: #f4f7f4; }
+.listing-delete-button { color: #a33b35; border-color: #edcfcc; }
+.listing-delete-button:hover { background: #fff4f3; }
 .row-action-menu { position: absolute; top: 29px; right: 0; z-index: 2; min-width: 142px; padding: 5px; border: 1px solid #e8ece8; border-radius: 8px; background: white; box-shadow: 0 10px 24px rgba(25,40,31,.12); }
 .row-action-menu button { width: 100%; padding: 8px; border: 0; border-radius: 5px; background: white; color: #556159; text-align: left; font-size: 10px; }
 .row-action-menu button:hover { background: #f5f8f5; }
