@@ -158,6 +158,14 @@ th:first-child, td:first-child { padding-left: 3px; }
 .listing-edit-button:hover { background: #f4f7f4; }
 .listing-delete-button { color: #a33b35; border-color: #edcfcc; }
 .listing-delete-button:hover { background: #fff4f3; }
+.order-actions { display: flex; justify-content: flex-end; }
+.order-update-button, .order-delete-button { min-height: 30px; padding: 6px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer; }
+.order-update-button { border: 1px solid #bfc9c2; background: #fff; color: #3f5548; }
+.order-update-button:hover { border-color: #738b7b; background: #f2f6f3; }
+.order-delete-button { border: 1px solid #edcfcc; background: #fff; color: #a33b35; }
+.order-delete-button:hover { background: #fff4f3; }
+.category-actions { display: flex; gap: 8px; margin-top: 14px; }
+.category-actions .button { min-height: 32px; flex: 1; }
 .row-action-menu { position: absolute; top: 29px; right: 0; z-index: 2; min-width: 142px; padding: 5px; border: 1px solid #e8ece8; border-radius: 8px; background: white; box-shadow: 0 10px 24px rgba(25,40,31,.12); }
 .row-action-menu button { width: 100%; padding: 8px; border: 0; border-radius: 5px; background: white; color: #556159; text-align: left; font-size: 10px; }
 .row-action-menu button:hover { background: #f5f8f5; }

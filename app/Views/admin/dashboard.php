@@ -209,6 +209,17 @@
     </section>
   </div>
 
+  <div class="modal-backdrop hidden" id="category-modal" role="presentation">
+    <section class="modal category-modal" role="dialog" aria-modal="true" aria-labelledby="category-modal-title">
+      <div class="modal-heading"><div><span class="eyebrow">CATALOG</span><h2 id="category-modal-title">Create category</h2><p>Define a name for the category.</p></div><button type="button" class="close-button" data-close-category-modal aria-label="Close">×</button></div>
+      <form id="category-form">
+        <input type="hidden" name="category_id" value="">
+        <label class="form-field">Category name<input name="name" placeholder="e.g. Boxing"></label>
+        <div class="modal-actions"><button type="button" class="button button-secondary" data-close-category-modal>Cancel</button><button type="submit" class="button button-primary">Add category</button></div>
+      </form>
+    </section>
+  </div>
+
   <div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
   <script src="app.js"></script>
 </body>

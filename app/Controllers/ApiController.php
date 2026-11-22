@@ -49,29 +49,14 @@ final class ApiController
             $this->respond(['data' => $this->marketplace->categories()]);
         }
         if ($method === 'POST' && $resource === 'listings') {
-            $data = $this->requestData();
-            $title = trim((string) ($data['title'] ?? ''));
-            $category = trim((string) ($data['category'] ?? ''));
-            $seller = trim((string) ($data['seller'] ?? ''));
-            $condition = trim((string) ($data['condition'] ?? 'Good'));
-            $price = filter_var($data['price'] ?? null, FILTER_VALIDATE_FLOAT);
-
-            if ($title === '' || mb_strlen($title) > 120 || $category === '' || $seller === '' || mb_strlen($seller) > 100) {
-                $this->respond(['error' => 'Enter a title (up to 120 characters), a category, and a seller.'], 422);
-            }
-            if ($price === false || $price <= 0 || $price > 999999.99) {
-                $this->respond(['error' => 'Price must be greater than 0 and less than €1,000,000.'], 422);
-            }
-            if (!in_array($condition, ['Like new', 'Very good', 'Good', 'Needs repair'], true)) {
-                $this->respond(['error' => 'Invalid item condition.'], 422);
-            }
+            $listing = $this->validateListingData($this->requestData());
 
             $id = $this->marketplace->createListing([
-                'title' => $title,
-                'category' => $category,
-                'seller' => $seller,
-                'condition' => $condition,
-                'price' => $price,
+                'title' => $listing['title'],
+                'category' => $listing['category'],
+                'seller' => $listing['seller'],
+                'condition' => $listing['condition'],
+                'price' => $listing['price'],
             ]);
             $this->respond(['id' => $id, 'message' => 'Listing created.'], 201);
         }

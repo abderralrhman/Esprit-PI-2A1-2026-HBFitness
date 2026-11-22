@@ -278,9 +278,28 @@ final class MarketplaceRepository
 
     public function deleteOrder(int $id): bool
     {
-        $delete = $this->pdo->prepare('DELETE FROM market_order WHERE id = ?');
-        $delete->execute([$id]);
-        return $delete->rowCount() === 1;
+        $this->pdo->beginTransaction();
+        try {
+            $order = $this->pdo->prepare('SELECT listing_id FROM market_order WHERE id = ?');
+            $order->execute([$id]);
+            $listingId = $order->fetchColumn();
+            if ($listingId === false) {
+                $this->pdo->rollBack();
+                return false;
+            }
+
+            $delete = $this->pdo->prepare('DELETE FROM market_order WHERE id = ?');
+            $delete->execute([$id]);
+            $this->pdo->prepare("UPDATE listing SET status = 'available' WHERE id = ? AND status = 'pending'")
+                ->execute([$listingId]);
+            $this->pdo->commit();
+            return $delete->rowCount() === 1;
+        } catch (Throwable $error) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            throw $error;
+        }
     }
 
     public function advanceOrder(int $id, string $nextStatus): bool
