@@ -115,6 +115,17 @@ final class ApiController
         if ($resource === 'orders' && isset($_GET['id']) && $method === 'PATCH') {
             $data = $this->requestData();
             $status = trim((string) ($data['status'] ?? ''));
+            if (isset($data['buyerName']) || isset($data['listingId'])) {
+                $listingId = filter_var($data['listingId'] ?? null, FILTER_VALIDATE_INT);
+                $buyerName = trim((string) ($data['buyerName'] ?? ''));
+                if ($listingId === false || $listingId < 1 || $buyerName === '' || mb_strlen($buyerName) > 100) {
+                    $this->respond(['error' => 'Enter a valid listing and buyer name.'], 422);
+                }
+                if (!$this->marketplace->updateOrder($this->resourceId(), $listingId, $buyerName, $status)) {
+                    $this->respond(['error' => 'Order not found.'], 404);
+                }
+                $this->respond(['message' => 'Order updated.']);
+            }
             if (!in_array($status, ['Shipped', 'Completed', 'Cancelled'], true)) {
                 $this->respond(['error' => 'Invalid order status.'], 422);
             }

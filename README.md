@@ -23,9 +23,9 @@ The default connection uses `127.0.0.1:3306`, database `hb_fitness`, MySQL user 
 ## MVC structure
 
 - `index.php` and `api.php`: application entry points.
-- `app/Controllers/`: page routing and API request handling.
-- `app/Models/MarketplaceRepository.php`: PDO-based MySQL access and prepared queries.
-- `app/Views/admin/` and `app/Views/front/`: Back Office and Front Office templates.
+- `Controllers/`: page routing and API request handling.
+- `Models/MarketplaceRepository.php`: PDO-based MySQL access and prepared queries.
+- `Views/admin/` and `Views/front/`: Back Office and Front Office templates.
 - `style.css`, `front-office.css`, and `app.js`: styling and browser interactions.
 - `marketplace_setup.sql`: schema and seed data compatible with the HB Fitness model.
 
