@@ -290,7 +290,7 @@ final class MarketplaceRepository
 
             $delete = $this->pdo->prepare('DELETE FROM market_order WHERE id = ?');
             $delete->execute([$id]);
-            $this->pdo->prepare("UPDATE listing SET status = 'available' WHERE id = ? AND status = 'pending'")
+            $this->pdo->prepare("UPDATE listing SET status = 'available' WHERE id = ? AND status IN ('pending', 'shipped')")
                 ->execute([$listingId]);
             $this->pdo->commit();
             return $delete->rowCount() === 1;
@@ -315,8 +315,8 @@ final class MarketplaceRepository
             }
 
             $transitions = [
-                'pending' => ['Shipped' => 'shipped'],
-                'shipped' => ['Completed' => 'completed'],
+                'pending' => ['Shipped' => 'shipped', 'Cancelled' => 'cancelled'],
+                'shipped' => ['Completed' => 'completed', 'Cancelled' => 'cancelled'],
             ];
             $status = $transitions[$currentOrder['status']][$nextStatus] ?? null;
             if ($status === null) {
@@ -329,6 +329,10 @@ final class MarketplaceRepository
             if ($status === 'completed') {
                 $this->pdo->prepare('UPDATE listing SET status = ? WHERE id = ?')
                     ->execute(['sold', $currentOrder['listing_id']]);
+            }
+            if ($status === 'cancelled') {
+                $this->pdo->prepare('UPDATE listing SET status = ? WHERE id = ?')
+                    ->execute(['available', $currentOrder['listing_id']]);
             }
             $this->pdo->commit();
 

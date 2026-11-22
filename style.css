@@ -159,7 +159,7 @@ th:first-child, td:first-child { padding-left: 3px; }
 .listing-edit-button:hover { background: #f4f7f4; }
 .listing-delete-button { color: #a33b35; border-color: #edcfcc; }
 .listing-delete-button:hover { background: #fff4f3; }
-.order-actions { display: flex; justify-content: flex-end; }
+.order-actions { display: flex; justify-content: flex-end; gap: 6px; }
 .order-update-button, .order-delete-button { min-height: 30px; padding: 6px 10px; border-radius: 6px; font-size: 10px; font-weight: 700; cursor: pointer; }
 .order-update-button { border: 1px solid #bfc9c2; background: #fff; color: #3f5548; }
 .order-update-button:hover { border-color: #738b7b; background: #f2f6f3; }

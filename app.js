@@ -200,7 +200,7 @@ function renderOrders() {
       <td><span class="seller-cell"><span class="mini-avatar alt-${index % 4}">${escapeHTML(initials(order.buyer))}</span>${escapeHTML(order.buyer)}</span></td>
       <td>${escapeHTML(order.date)}</td><td class="price-cell">${money(order.amount)}</td>
       <td><span class="status ${safeStatusClass(order.status)}">${escapeHTML(order.status)}</span></td>
-      <td><div class="order-actions">${order.status === "Completed" || order.status === "Cancelled" ? `<button type="button" class="order-delete-button" data-order-delete="${escapeHTML(order.id)}">Delete</button>` : `<button type="button" class="order-update-button" data-order-update="${escapeHTML(order.id)}">${order.status === "To process" ? "Ship" : "Complete"}</button>`}</div></td>
+      <td><div class="order-actions">${order.status === "Completed" || order.status === "Cancelled" ? `<button type="button" class="order-delete-button" data-order-delete="${escapeHTML(order.id)}">Delete</button>` : `<button type="button" class="order-update-button" data-order-update="${escapeHTML(order.id)}">${order.status === "To process" ? "Ship" : "Complete"}</button><button type="button" class="order-delete-button" data-order-cancel="${escapeHTML(order.id)}">Cancel</button>`}</div></td>
     </tr>`).join("");
   document.getElementById("order-empty").classList.toggle("hidden", filtered.length > 0);
 }
@@ -222,7 +222,9 @@ function changeView(view) {
   document.getElementById("breadcrumb-current").textContent = viewTitles[view][0];
   document.getElementById("page-title").textContent = viewTitles[view][1];
   document.getElementById("page-subtitle").textContent = viewTitles[view][2];
-  document.getElementById("add-listing-button").classList.toggle("hidden", view === "categories");
+  const addButton = document.getElementById("add-listing-button");
+  addButton.classList.toggle("hidden", view === "categories");
+  addButton.innerHTML = view === "orders" ? '<span class="plus">+</span> New order' : '<span class="plus">+</span> New listing';
   document.getElementById("sidebar").classList.remove("open");
   render();
 }
@@ -239,6 +241,19 @@ function closeListingModal() {
   document.getElementById("listing-modal").classList.add("hidden");
   document.querySelector('#listing-form input[name="listing_id"]').value = "";
   document.getElementById("modal-title").textContent = "Create a listing";
+}
+
+function openOrderModal() {
+  const form = document.getElementById("order-form");
+  const availableListings = listings.filter((listing) => listing.status === "Available");
+  const listingSelect = form.elements.listingId;
+  listingSelect.innerHTML = availableListings.length
+    ? availableListings.map((listing) => `<option value="${listing.id}">${escapeHTML(listing.title)} - ${money(listing.price)}</option>`).join("")
+    : '<option value="">No available listing</option>';
+  form.reset();
+  if (listingSelect.options.length) listingSelect.selectedIndex = 0;
+  document.getElementById("order-modal").classList.remove("hidden");
+  form.elements.buyerName.focus();
 }
 
 function openListingEdit(listing) {
@@ -358,7 +373,10 @@ async function addCategory() {
 }
 
 document.querySelectorAll("[data-view]").forEach((button) => button.addEventListener("click", () => changeView(button.dataset.view)));
-document.getElementById("add-listing-button").addEventListener("click", openListingModal);
+document.getElementById("add-listing-button").addEventListener("click", () => {
+  if (currentView === "orders") openOrderModal();
+  else openListingModal();
+});
 document.querySelectorAll("[data-close-modal]").forEach((button) => button.addEventListener("click", closeListingModal));
 document.getElementById("listing-modal").addEventListener("click", (event) => {
   if (event.target.id === "listing-modal") closeListingModal();
@@ -369,6 +387,31 @@ document.addEventListener("keydown", (event) => {
     event.preventDefault();
     document.getElementById("global-search").focus();
   }
+});
+
+document.getElementById("order-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const formData = new FormData(event.currentTarget);
+  const listingId = Number(formData.get("listingId"));
+  const buyerName = String(formData.get("buyerName") || "").trim();
+  const buyerEmail = String(formData.get("buyerEmail") || "").trim();
+  if (!Number.isInteger(listingId) || listingId < 1 || !buyerName || buyerName.length > 100 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(buyerEmail) || buyerEmail.length > 120) {
+    showToast("Select an available listing and enter a valid buyer name and email.");
+    return;
+  }
+  try {
+    await apiRequest("orders", { method: "POST", body: { listingId, buyerName, buyerEmail } });
+    document.getElementById("order-modal").classList.add("hidden");
+    await loadDashboard();
+    changeView("orders");
+    showToast("Order created.");
+  } catch (error) {
+    showToast(error.message);
+  }
+});
+
+document.querySelectorAll("[data-close-order-modal]").forEach((button) => {
+  button.addEventListener("click", () => document.getElementById("order-modal").classList.add("hidden"));
 });
 
 document.getElementById("category-cards").addEventListener("click", (event) => {
@@ -462,6 +505,22 @@ document.querySelectorAll("#order-filters .filter-tab").forEach((button) => butt
 }));
 
 document.getElementById("all-orders").addEventListener("click", async (event) => {
+  const cancelButton = event.target.closest("[data-order-cancel]");
+  if (cancelButton) {
+    const order = orders.find((item) => item.id === Number(cancelButton.dataset.orderCancel));
+    if (!order) return;
+    openConfirm(`Cancel order ${order.reference}?`, async () => {
+      try {
+        await apiRequest(`orders&id=${order.id}`, { method: "PATCH", body: { status: "Cancelled" } });
+        await loadDashboard();
+        showToast("Order cancelled.");
+      } catch (error) {
+        showToast(error.message);
+      }
+    });
+    return;
+  }
+
   const deleteButton = event.target.closest("[data-order-delete]");
   if (deleteButton) {
     const order = orders.find((item) => item.id === Number(deleteButton.dataset.orderDelete));

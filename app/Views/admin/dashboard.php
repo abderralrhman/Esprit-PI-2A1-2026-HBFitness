@@ -168,6 +168,7 @@
                 <button class="filter-tab" data-filter="To process">To process</button>
                 <button class="filter-tab" data-filter="Shipped">Shipped</button>
                 <button class="filter-tab" data-filter="Completed">Completed</button>
+                <button class="filter-tab" data-filter="Cancelled">Cancelled</button>
               </div>
               <button class="button button-secondary" id="export-orders">↓ Export</button>
             </div>
@@ -188,6 +189,20 @@
         <footer class="page-footer"><span>© 2026 Atelier Market</span><span>A marketplace for sports enthusiasts <span class="footer-heart">♥</span></span></footer>
       </div>
     </main>
+  </div>
+
+  <div class="modal-backdrop hidden" id="order-modal" role="presentation">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="order-modal-title">
+      <div class="modal-heading"><div><span class="eyebrow">ORDERS</span><h2 id="order-modal-title">Create order</h2><p>Reserve an available listing for a buyer.</p></div><button type="button" class="close-button" data-close-order-modal aria-label="Close">×</button></div>
+      <form id="order-form">
+        <label class="form-field">Available listing<select name="listingId"></select></label>
+        <div class="form-row">
+          <label class="form-field">Buyer name<input name="buyerName" placeholder="Full name"></label>
+          <label class="form-field">Buyer email<input name="buyerEmail" type="text" inputmode="email" placeholder="buyer@example.com"></label>
+        </div>
+        <div class="modal-actions"><button type="button" class="button button-secondary" data-close-order-modal>Cancel</button><button type="submit" class="button button-primary">Create order</button></div>
+      </form>
+    </section>
   </div>
 
   <div class="modal-backdrop hidden" id="confirm-modal" role="presentation">
