@@ -7,6 +7,25 @@ let orderFilter = "All";
 let searchTerm = "";
 let oldestFirst = false;
 let toastTimer;
+let confirmAction = null;
+
+function openConfirm(message, action) {
+  confirmAction = action;
+  document.getElementById("confirm-message").textContent = message;
+  document.getElementById("confirm-modal").classList.remove("hidden");
+  document.getElementById("confirm-cancel").focus();
+}
+
+document.getElementById("confirm-cancel").addEventListener("click", () => {
+  confirmAction = null;
+  document.getElementById("confirm-modal").classList.add("hidden");
+});
+document.getElementById("confirm-delete").addEventListener("click", async () => {
+  const action = confirmAction;
+  confirmAction = null;
+  document.getElementById("confirm-modal").classList.add("hidden");
+  if (action) await action();
+});
 
 const viewTitles = {
   dashboard: ["Overview", "Hello Sophie", "Here’s what’s happening on your marketplace today."],
@@ -248,14 +267,16 @@ function attachListingActions() {
   document.querySelectorAll("[data-listing-delete]").forEach((button) => {
     button.addEventListener("click", async () => {
       const listing = listings.find((item) => item.id === Number(button.dataset.listingDelete));
-      if (!listing || !window.confirm(`Delete "${listing.title}"?`)) return;
-      try {
+      if (!listing) return;
+      openConfirm(`Delete "${listing.title}"?`, async () => {
+        try {
         await apiRequest(`listings&id=${listing.id}`, { method: "DELETE" });
         await loadDashboard();
-        showToast("Listing deleted.");
-      } catch (error) {
-        showToast(error.message);
-      }
+          showToast("Listing deleted.");
+        } catch (error) {
+          showToast(error.message);
+        }
+      });
     });
   });
 
@@ -277,14 +298,18 @@ function attachListingActions() {
             return;
           }
           if (action === "Delete") {
-            if (!window.confirm(`Delete "${listing.title}"?`)) return;
-            await apiRequest(`listings&id=${listing.id}`, { method: "DELETE" });
+            openConfirm(`Delete "${listing.title}"?`, async () => {
+              await apiRequest(`listings&id=${listing.id}`, { method: "DELETE" });
+              await loadDashboard();
+              showToast("Listing deleted.");
+            });
+            return;
           } else {
             const status = action === "Mark as sold" ? "Sold" : action === "Put on hold" ? "Pending" : "Available";
             await apiRequest(`listings&id=${listing.id}`, { method: "PATCH", body: { status } });
           }
           await loadDashboard();
-          showToast(action === "Delete" ? "Listing deleted." : "Listing status updated.");
+          if (action !== "Delete") showToast("Listing status updated.");
         } catch (error) {
           console.error("Unable to update listing.", error);
           showToast(error.message);
@@ -317,7 +342,7 @@ function editCategory(category) {
 }
 
 async function deleteCategory(category) {
-  if (!window.confirm(`Delete the category "${category.name}"?`)) return;
+  openConfirm(`Delete the category "${category.name}"?`, async () => {
   try {
     await apiRequest(`categories&id=${category.id}`, { method: "DELETE" });
     await loadDashboard();
@@ -325,6 +350,7 @@ async function deleteCategory(category) {
   } catch (error) {
     showToast(error.message);
   }
+  });
 }
 
 async function addCategory() {
@@ -439,7 +465,8 @@ document.getElementById("all-orders").addEventListener("click", async (event) =>
   const deleteButton = event.target.closest("[data-order-delete]");
   if (deleteButton) {
     const order = orders.find((item) => item.id === Number(deleteButton.dataset.orderDelete));
-    if (!order || !window.confirm(`Delete order ${order.reference}?`)) return;
+    if (!order) return;
+    openConfirm(`Delete order ${order.reference}?`, async () => {
     try {
       await apiRequest(`orders&id=${order.id}`, { method: "DELETE" });
       await loadDashboard();
@@ -447,6 +474,7 @@ document.getElementById("all-orders").addEventListener("click", async (event) =>
     } catch (error) {
       showToast(error.message);
     }
+    });
     return;
   }
 
@@ -482,7 +510,7 @@ document.getElementById("all-orders").addEventListener("click", async (event) =>
     }
     return;
   }
-  if (window.confirm(`Delete order ${order.reference}?`)) {
+  openConfirm(`Delete order ${order.reference}?`, async () => {
     try {
       await apiRequest(`orders&id=${order.id}`, { method: "DELETE" });
       await loadDashboard();
@@ -490,7 +518,7 @@ document.getElementById("all-orders").addEventListener("click", async (event) =>
     } catch (error) {
       showToast(error.message);
     }
-  }
+  });
 });
 
 document.getElementById("global-search").addEventListener("input", (event) => {
