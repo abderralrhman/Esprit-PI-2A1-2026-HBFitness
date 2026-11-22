@@ -1,13 +1,24 @@
 <?php
 /**
  * Views/includes/navbar.php
- * Reusable Frontoffice Navigation Bar
- * Expects: $currentPage (string), $currentUser (?User)
+ * Reusable Frontoffice Navigation Bar (User + Marketplace + Blog)
+ * Expects: $currentPage (string), $currentUser (?User|?array)
  */
 $currentPage = $currentPage ?? 'home';
 $currentUser = $currentUser ?? null;
 
-$isActive = static fn(string $page): string => $currentPage === $page ? 'active' : '';
+$navUserRole = null;
+$navUserName = null;
+if (is_object($currentUser) && method_exists($currentUser, 'getRoleName')) {
+    $navUserRole = (string)$currentUser->getRoleName();
+    $navUserName = (string)$currentUser->getFullName();
+} elseif (is_array($currentUser) && !empty($currentUser['role'])) {
+    $navUserRole = (string)$currentUser['role'];
+    $navUserName = (string)($currentUser['full_name'] ?? 'User');
+}
+
+$isActive     = static fn(string $page): string => $currentPage === $page ? 'active' : '';
+$isBlogActive = in_array($currentPage, ['blog', 'articles', 'my_comments', 'create_article'], true) ? 'active' : '';
 ?>
 <nav class="navbar navbar-expand-lg fo-navbar sticky-top">
     <div class="container">
@@ -35,7 +46,12 @@ $isActive = static fn(string $page): string => $currentPage === $page ? 'active'
                         <i class="fa-solid fa-shop me-1"></i> Marketplace
                     </a>
                 </li>
-                <?php if ($currentUser): ?>
+                <li class="nav-item">
+                    <a class="nav-link <?= $isBlogActive ?>" href="index.php?action=blog">
+                        <i class="fa-solid fa-newspaper me-1"></i> Blog
+                    </a>
+                </li>
+                <?php if ($navUserRole !== null): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= $isActive('dashboard') ?>" href="index.php?action=dashboard">
                             <i class="fa-solid fa-gauge-high me-1"></i> Dashboard
@@ -51,7 +67,7 @@ $isActive = static fn(string $page): string => $currentPage === $page ? 'active'
                             <i class="fa-solid fa-user-pen me-1"></i> Edit Profile
                         </a>
                     </li>
-                    <?php if ($currentUser->getRoleName() === 'admin'): ?>
+                    <?php if ($navUserRole === 'admin'): ?>
                         <li class="nav-item">
                             <a class="nav-link" href="index.php?action=admin_dashboard">
                                 <i class="fa-solid fa-shield-halved me-1 text-coral"></i> Backoffice
@@ -62,11 +78,11 @@ $isActive = static fn(string $page): string => $currentPage === $page ? 'active'
             </ul>
 
             <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
-                <?php if ($currentUser): ?>
-                    <span class="hb-badge hb-badge-<?= htmlspecialchars($currentUser->getRoleName(), ENT_QUOTES, 'UTF-8') ?>">
+                <?php if ($navUserRole !== null): ?>
+                    <span class="hb-badge hb-badge-<?= htmlspecialchars($navUserRole, ENT_QUOTES, 'UTF-8') ?>">
                         <i class="fa-solid fa-user-check"></i>
-                        <?= htmlspecialchars($currentUser->getFullName(), ENT_QUOTES, 'UTF-8') ?>
-                        (<?= htmlspecialchars($currentUser->getRoleName(), ENT_QUOTES, 'UTF-8') ?>)
+                        <?= htmlspecialchars((string)$navUserName, ENT_QUOTES, 'UTF-8') ?>
+                        (<?= htmlspecialchars($navUserRole, ENT_QUOTES, 'UTF-8') ?>)
                     </span>
                     <a href="index.php?action=logout" class="btn btn-hb-outline btn-sm">
                         <i class="fa-solid fa-right-from-bracket me-1"></i> Logout

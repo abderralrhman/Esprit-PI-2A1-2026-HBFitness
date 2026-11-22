@@ -2,7 +2,7 @@
 declare(strict_types=1);
 
 /**
- * index.php — Unified Front Controller & Router (HB FITNESS - User & Market Integration)
+ * index.php — Unified Front Controller & Router (HB FITNESS - User, Market & Blog Integration)
  * ESPRIT School of Engineering — Web Technologies 2A (2026-2027)
  */
 
@@ -53,9 +53,17 @@ require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/Models/MarketplaceRepository.php';
 require_once __DIR__ . '/Controllers/PageController.php';
 
-$authController = new AuthController();
-$userController = new UserController($authController);
-$roleController = new RoleController($authController);
+// Load Controllers & Shared Auth Adapter (Blog Management)
+require_once __DIR__ . '/Controllers/Blog/BlogAuthAdapter.php';
+require_once __DIR__ . '/Controllers/Blog/ArticleController.php';
+require_once __DIR__ . '/Controllers/Blog/CommentController.php';
+
+$authController    = new AuthController();
+$userController    = new UserController($authController);
+$roleController    = new RoleController($authController);
+$blogAuth          = new BlogAuthAdapter();
+$articleController = new ArticleController($blogAuth);
+$commentController = new CommentController($blogAuth);
 
 // Determine action: supports ?action=... (User module standard) and ?page=... (Market module standard)
 $action = (string)($_GET['action'] ?? ($_GET['page'] ?? 'home'));
@@ -403,6 +411,257 @@ switch ($action) {
         $csrfToken   = $authController->getCsrfToken();
         $currentPage = 'admin_roles';
         require __DIR__ . '/Views/Backoffice/manageRoles.php';
+        break;
+
+    // =========================================================================
+    // BLOG FRONTOFFICE ROUTES (Public Reading + Shared-Auth Commenting)
+    // =========================================================================
+    case 'blog':
+    case 'blog_home':
+        $currentUser    = $blogAuth->getCurrentUser();
+        $stats          = $articleController->getStats();
+        $latestArticles = array_slice($articleController->getAllArticles(), 0, 6);
+        $currentPage    = 'blog';
+        require __DIR__ . '/Views/Frontoffice/blog/home.php';
+        break;
+
+    case 'articles':
+        $currentUser = $blogAuth->getCurrentUser();
+        $search      = trim((string)($_GET['search'] ?? ''));
+        $onlyMine    = !empty($_GET['mine']) && $currentUser && $currentUser['role'] === 'coach';
+        $articles    = $articleController->getAllArticles($search, $onlyMine ? (int)$currentUser['id'] : null);
+        $currentPage = 'articles';
+        require __DIR__ . '/Views/Frontoffice/blog/listArticles.php';
+        break;
+
+    case 'article_details':
+        $currentUser = $blogAuth->getCurrentUser();
+        $articleId   = (int)($_GET['id'] ?? 0);
+        $article     = $articleController->getArticleById($articleId);
+        if (!$article) {
+            BlogAuthAdapter::flash('Article not found.', 'error');
+            header('Location: index.php?action=articles');
+            exit;
+        }
+        $comments    = $commentController->getCommentsByArticle($articleId);
+        $csrfToken   = $blogAuth->getCsrfToken();
+        $currentPage = 'articles';
+        require __DIR__ . '/Views/Frontoffice/blog/articleDetails.php';
+        break;
+
+    case 'create_comment':
+        $currentUser = $blogAuth->requireAuth();
+        $articleId   = (int)($_GET['article_id'] ?? $_POST['article_id'] ?? 0);
+        $article     = $articleController->getArticleById($articleId);
+        if (!$article) {
+            BlogAuthAdapter::flash('Target article not found.', 'error');
+            header('Location: index.php?action=articles');
+            exit;
+        }
+        $errors = [];
+        $old    = ['content' => ''];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $old['content'] = trim((string)($_POST['content'] ?? ''));
+            $errors         = $commentController->createComment($_POST, $currentUser);
+            if (empty($errors)) {
+                BlogAuthAdapter::flash('Your comment has been published.');
+                header('Location: index.php?action=article_details&id=' . $articleId);
+                exit;
+            }
+        }
+        $csrfToken   = $blogAuth->getCsrfToken();
+        $currentPage = 'articles';
+        require __DIR__ . '/Views/Frontoffice/blog/createComment.php';
+        break;
+
+    case 'update_comment':
+        $currentUser = $blogAuth->requireAuth();
+        $commentId   = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
+        $comment     = $commentController->getCommentById($commentId);
+        if (!$comment) {
+            BlogAuthAdapter::flash('Comment not found.', 'error');
+            header('Location: index.php?action=my_comments');
+            exit;
+        }
+        if (!CommentController::canManageComment($comment, $currentUser)) {
+            $blogAuth->renderForbidden('You can only edit your own comments.', $currentUser);
+        }
+        $errors = [];
+        $old    = ['content' => $comment->getContent()];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $old['content'] = trim((string)($_POST['content'] ?? ''));
+            $errors         = $commentController->updateComment($commentId, $_POST, $currentUser);
+            if (empty($errors)) {
+                BlogAuthAdapter::flash('Comment updated successfully.');
+                $redirect = ($currentUser['role'] === 'admin' && !empty($_POST['from_admin']))
+                    ? 'admin_comments'
+                    : 'article_details&id=' . $comment->getArticleId();
+                header('Location: index.php?action=' . $redirect);
+                exit;
+            }
+        }
+        $csrfToken   = $blogAuth->getCsrfToken();
+        $fromAdmin   = !empty($_GET['from_admin']);
+        $currentPage = 'my_comments';
+        require __DIR__ . '/Views/Frontoffice/blog/updateComment.php';
+        break;
+
+    case 'delete_comment':
+        $currentUser = $blogAuth->requireAuth();
+        $commentId   = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
+        $comment     = $commentController->getCommentById($commentId);
+        if (!$comment) {
+            BlogAuthAdapter::flash('Comment not found.', 'error');
+            header('Location: index.php?action=my_comments');
+            exit;
+        }
+        if (!CommentController::canManageComment($comment, $currentUser)) {
+            $blogAuth->renderForbidden('You can only delete your own comments.', $currentUser);
+        }
+        $errors    = [];
+        $fromAdmin = !empty($_GET['from_admin']) || !empty($_POST['from_admin']);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $articleId = $comment->getArticleId();
+            $errors    = $commentController->deleteComment($commentId, $currentUser, $_POST['csrf_token'] ?? null);
+            if (empty($errors)) {
+                BlogAuthAdapter::flash('Comment deleted successfully.');
+                $redirect = ($currentUser['role'] === 'admin' && $fromAdmin)
+                    ? 'admin_comments'
+                    : 'article_details&id=' . $articleId;
+                header('Location: index.php?action=' . $redirect);
+                exit;
+            }
+        }
+        $csrfToken   = $blogAuth->getCsrfToken();
+        $currentPage = 'my_comments';
+        require __DIR__ . '/Views/Frontoffice/blog/deleteComment.php';
+        break;
+
+    case 'my_comments':
+        $currentUser = $blogAuth->requireAuth();
+        $comments    = $commentController->getCommentsByUser((int)$currentUser['id']);
+        $currentPage = 'my_comments';
+        require __DIR__ . '/Views/Frontoffice/blog/myComments.php';
+        break;
+
+    // =========================================================================
+    // BLOG ARTICLE AUTHORING ROUTES (Admin: Backoffice | Coach: Frontoffice)
+    // =========================================================================
+    case 'create_article':
+        $currentUser = $blogAuth->requireArticlePublisher();
+        $errors      = [];
+        $old         = ['title' => '', 'content' => '', 'recipe_id' => ''];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $old = [
+                'title'     => trim((string)($_POST['title'] ?? '')),
+                'content'   => trim((string)($_POST['content'] ?? '')),
+                'recipe_id' => trim((string)($_POST['recipe_id'] ?? '')),
+            ];
+            $errors = $articleController->createArticle($_POST, $currentUser);
+            if (empty($errors)) {
+                BlogAuthAdapter::flash('Article published successfully!');
+                $target = $currentUser['role'] === 'admin' ? 'admin_articles' : 'articles';
+                header('Location: index.php?action=' . $target);
+                exit;
+            }
+        }
+        $csrfToken   = $blogAuth->getCsrfToken();
+        $currentPage = $currentUser['role'] === 'admin' ? 'admin_create_article' : 'create_article';
+        require __DIR__ . '/Views/Backoffice/blog/createArticle.php';
+        break;
+
+    case 'update_article':
+        $currentUser = $blogAuth->requireArticlePublisher();
+        $articleId   = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
+        $article     = $articleController->getArticleById($articleId);
+        if (!$article) {
+            BlogAuthAdapter::flash('Article not found.', 'error');
+            header('Location: index.php?action=' . ($currentUser['role'] === 'admin' ? 'admin_articles' : 'articles'));
+            exit;
+        }
+        if (!ArticleController::canManageArticle($article, $currentUser)) {
+            $blogAuth->renderForbidden('Coaches can only edit their own published articles.', $currentUser);
+        }
+        $errors = [];
+        $old    = [
+            'title'     => $article->getTitle(),
+            'content'   => $article->getContent(),
+            'recipe_id' => $article->getRecipeId() !== null ? (string)$article->getRecipeId() : '',
+        ];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $old = [
+                'title'     => trim((string)($_POST['title'] ?? '')),
+                'content'   => trim((string)($_POST['content'] ?? '')),
+                'recipe_id' => trim((string)($_POST['recipe_id'] ?? '')),
+            ];
+            $errors = $articleController->updateArticle($articleId, $_POST, $currentUser);
+            if (empty($errors)) {
+                BlogAuthAdapter::flash("Article #{$articleId} updated successfully.");
+                $target = $currentUser['role'] === 'admin' ? 'admin_articles' : 'article_details&id=' . $articleId;
+                header('Location: index.php?action=' . $target);
+                exit;
+            }
+        }
+        $csrfToken   = $blogAuth->getCsrfToken();
+        $currentPage = $currentUser['role'] === 'admin' ? 'admin_articles' : 'articles';
+        require __DIR__ . '/Views/Backoffice/blog/updateArticle.php';
+        break;
+
+    case 'delete_article':
+        $currentUser = $blogAuth->requireArticlePublisher();
+        $articleId   = (int)($_GET['id'] ?? $_POST['id'] ?? 0);
+        $article     = $articleController->getArticleById($articleId);
+        if (!$article) {
+            BlogAuthAdapter::flash('Article not found.', 'error');
+            header('Location: index.php?action=' . ($currentUser['role'] === 'admin' ? 'admin_articles' : 'articles'));
+            exit;
+        }
+        if (!ArticleController::canManageArticle($article, $currentUser)) {
+            $blogAuth->renderForbidden('Coaches can only delete their own published articles.', $currentUser);
+        }
+        $errors = [];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $errors = $articleController->deleteArticle($articleId, $currentUser, $_POST['csrf_token'] ?? null);
+            if (empty($errors)) {
+                BlogAuthAdapter::flash("Article #{$articleId} and its comments have been deleted.");
+                $target = $currentUser['role'] === 'admin' ? 'admin_articles' : 'articles';
+                header('Location: index.php?action=' . $target);
+                exit;
+            }
+        }
+        $csrfToken   = $blogAuth->getCsrfToken();
+        $currentPage = $currentUser['role'] === 'admin' ? 'admin_articles' : 'articles';
+        require __DIR__ . '/Views/Backoffice/blog/deleteArticle.php';
+        break;
+
+    // =========================================================================
+    // BLOG BACKOFFICE ROUTES (ADMIN ONLY)
+    // =========================================================================
+    case 'admin_blog_dashboard':
+        $currentUser    = $blogAuth->requireAdmin();
+        $stats          = $articleController->getStats();
+        $recentArticles = array_slice($articleController->getAllArticles(), 0, 5);
+        $recentComments = array_slice($commentController->getAllComments(), 0, 5);
+        $currentPage    = 'admin_blog_dashboard';
+        require __DIR__ . '/Views/Backoffice/blog/dashboard.php';
+        break;
+
+    case 'admin_articles':
+        $currentUser = $blogAuth->requireAdmin();
+        $search      = trim((string)($_GET['search'] ?? ''));
+        $articles    = $articleController->getAllArticles($search);
+        $currentPage = 'admin_articles';
+        require __DIR__ . '/Views/Backoffice/blog/listArticles.php';
+        break;
+
+    case 'admin_comments':
+        $currentUser   = $blogAuth->requireAdmin();
+        $search        = trim((string)($_GET['search'] ?? ''));
+        $filterArticle = isset($_GET['article_id']) && $_GET['article_id'] !== '' ? (int)$_GET['article_id'] : null;
+        $comments      = $commentController->getAllComments($search, $filterArticle);
+        $allArticles   = $articleController->getAllArticles();
+        $currentPage   = 'admin_comments';
+        require __DIR__ . '/Views/Backoffice/blog/manageComments.php';
         break;
 
     default:

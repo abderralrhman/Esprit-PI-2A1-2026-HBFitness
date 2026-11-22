@@ -59,6 +59,10 @@ class Database
                         $sql = (string)file_get_contents($sqlFile);
                         $bootstrapPdo->exec($sql);
                         self::$pdo = new PDO($dsn, $username, $password, $options);
+                        $blogSqlFile = dirname(__DIR__) . '/blog.sql';
+                        if (file_exists($blogSqlFile)) {
+                            self::$pdo->exec((string)file_get_contents($blogSqlFile));
+                        }
                         return self::$pdo;
                     } catch (PDOException $ex) {
                         error_log('[HBfitess DB Bootstrap Error] ' . $ex->getMessage());

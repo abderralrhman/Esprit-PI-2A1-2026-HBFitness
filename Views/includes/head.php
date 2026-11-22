@@ -21,3 +21,4 @@ $isAdminLayout = $isAdminLayout ?? false;
 <?php else: ?>
 <link href="Views/assets/css/frontoffice.css?v=2" rel="stylesheet">
 <?php endif; ?>
+<link href="Views/assets/css/blog.css?v=2" rel="stylesheet">
