@@ -78,12 +78,12 @@ git clone https://github.com/abderralrhman/Esprit-PI-2A1-2026-HBFitness.git
 cd Esprit-PI-2A1-2026-HBFitness
 ```
 
-2. Create the database: open phpMyAdmin and import `database/hb_fitness.sql`.
-3. Set your database credentials in `config/database.php` (host, database name, user, password).
-4. Start the server with XAMPP/WAMP, or from the terminal:
+2. Start Apache and MySQL in XAMPP. The application connects using the default XAMPP credentials (`root` with an empty password) and creates the `fitness_db` database, its tables, and demo records on first use. No SQL file needs to be imported.
+3. If your MySQL credentials differ, update the connection settings in `config.php`.
+4. Open the project through XAMPP at `http://localhost/Esprit-PI-2A1-2026-HBFitness/`, or start the PHP development server:
 
 ```bash
 php -S localhost:8000
 ```
 
-5. Open `http://localhost:8000` in your browser.
+5. If using the PHP development server, open `http://localhost:8000` in your browser.
