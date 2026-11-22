@@ -195,14 +195,14 @@
       <div class="modal-heading"><div><span class="eyebrow">CATALOG</span><h2 id="modal-title">Create a listing</h2><p>Add an item to the marketplace.</p></div><button class="close-button" data-close-modal aria-label="Close">×</button></div>
       <form id="listing-form">
         <input type="hidden" name="listing_id" value="">
-        <label class="form-field">Item name<input name="title" required maxlength="120" placeholder="e.g. Adjustable dumbbells"></label>
+        <label class="form-field">Item name<input name="title" placeholder="e.g. Adjustable dumbbells"></label>
         <div class="form-row">
-          <label class="form-field">Category<select name="category" required></select></label>
-          <label class="form-field">Price (€)<input name="price" type="number" min="0.01" step="0.01" required placeholder="0.00"></label>
+          <label class="form-field">Category<select name="category"></select></label>
+          <label class="form-field">Price (€)<input name="price" type="text" inputmode="decimal" placeholder="0.00"></label>
         </div>
         <div class="form-row">
           <label class="form-field">Condition<select name="condition"><option>Like new</option><option>Very good</option><option>Good</option><option>Needs repair</option></select></label>
-          <label class="form-field">Seller<input name="seller" required maxlength="60" placeholder="Seller name"></label>
+          <label class="form-field">Seller<input name="seller" placeholder="Seller name"></label>
         </div>
         <div class="modal-actions"><button type="button" class="button button-secondary" data-close-modal>Cancel</button><button type="submit" class="button button-primary">Publish listing <span>→</span></button></div>
       </form>

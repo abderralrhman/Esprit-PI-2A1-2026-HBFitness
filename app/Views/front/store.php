@@ -53,8 +53,8 @@ $escape = static fn (mixed $value): string => htmlspecialchars((string) $value, 
                 <input type="hidden" name="action" value="buy">
                 <input type="hidden" name="listing_id" value="<?= (int) $selectedListing['id'] ?>">
                 <input type="hidden" name="csrf_token" value="<?= $escape($csrfToken) ?>">
-                <label>Your name<input name="buyer_name" required maxlength="100" autocomplete="name" placeholder="Full name"></label>
-                <label>Your email<input name="buyer_email" type="email" required maxlength="120" autocomplete="email" placeholder="you@example.com"></label>
+                <label>Your name<input name="buyer_name" autocomplete="name" placeholder="Full name"></label>
+                <label>Your email<input name="buyer_email" type="text" inputmode="email" autocomplete="email" placeholder="you@example.com"></label>
                 <button class="store-button" type="submit">Reserve item <span>→</span></button>
                 <small>Your reservation creates an order with “To process” status.</small>
               </form>
