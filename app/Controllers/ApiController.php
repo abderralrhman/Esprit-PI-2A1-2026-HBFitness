@@ -101,9 +101,24 @@ final class ApiController
             }
             $this->respond(['message' => 'Category deleted.']);
         }
+        if ($method === 'POST' && $resource === 'orders') {
+            $data = $this->requestData();
+            $listingId = filter_var($data['listingId'] ?? null, FILTER_VALIDATE_INT);
+            $buyerName = trim((string) ($data['buyerName'] ?? ''));
+            $buyerEmail = trim((string) ($data['buyerEmail'] ?? ''));
+            if ($listingId === false || $listingId < 1 || $buyerName === '' || mb_strlen($buyerName) > 100 || mb_strlen($buyerEmail) > 120 || !filter_var($buyerEmail, FILTER_VALIDATE_EMAIL)) {
+                $this->respond(['error' => 'Select a listing and enter a valid buyer name and email.'], 422);
+            }
+            $id = $this->marketplace->createOrder($listingId, $buyerName, $buyerEmail);
+            $this->respond(['id' => $id, 'message' => 'Order created.'], 201);
+        }
         if ($resource === 'orders' && isset($_GET['id']) && $method === 'PATCH') {
             $data = $this->requestData();
-            if (!$this->marketplace->advanceOrder($this->resourceId(), (string) ($data['status'] ?? ''))) {
+            $status = trim((string) ($data['status'] ?? ''));
+            if (!in_array($status, ['Shipped', 'Completed', 'Cancelled'], true)) {
+                $this->respond(['error' => 'Invalid order status.'], 422);
+            }
+            if (!$this->marketplace->advanceOrder($this->resourceId(), $status)) {
                 $this->respond(['error' => 'Order not found.'], 404);
             }
             $this->respond(['message' => 'Order status updated.']);
