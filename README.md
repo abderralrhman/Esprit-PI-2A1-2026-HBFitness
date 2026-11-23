@@ -371,9 +371,14 @@ HB-Fitness/
 │
 ├── Views/
 │   ├── Frontoffice/
+│   │   ├── forgotPassword.php
+│   │   ├── resetPassword.php
+│   │   ├── profile.php
 │   │   └── blog/
 │   │
 │   ├── Backoffice/
+│   │   ├── profile.php
+│   │   ├── editProfile.php
 │   │   └── blog/
 │   │
 │   ├── front/
@@ -389,6 +394,8 @@ HB-Fitness/
 ├── index.php
 ├── api.php
 ├── db.php
+├── composer.json
+├── composer.lock
 ├── blog.sql
 ├── hbfitess.sql
 ├── marketplace_setup.sql
@@ -431,7 +438,7 @@ SQL JOIN queries are used to:
 
 | File | Description |
 |---|---|
-| `hbfitess.sql` | Shared User Management schema |
+| `hbfitess.sql` | Shared User Management schema, including password reset tokens |
 | `blog.sql` | Blog Article and Comment schema |
 | `marketplace_setup.sql` | Marketplace schema |
 
@@ -487,6 +494,11 @@ For a fresh local installation:
 2. Import `hbfitess.sql`.
 3. Import `blog.sql` into the compatible database.
 4. Check database configuration in `config/database.php`.
+5. Install PHP dependencies from the project directory:
+
+   ```bash
+   composer install
+   ```
 
 Do not import SQL over an existing database without a backup and schema review.
 
@@ -496,9 +508,15 @@ The Marketplace currently has a separate setup file and may require additional c
 
 Open:
 
-`http://localhost/fitness/`
+`http://localhost/Esprit-PI-2A1-2026-HBFitness/`
 
 If your local project folder has a different name, adjust the URL accordingly.
+
+### Local Password Reset Demo
+
+The password reset flow is local-only and sends messages to MailCatcher, not to real email addresses. Start MailCatcher with its SMTP service on `127.0.0.1:1025`, then open its inbox at `http://127.0.0.1:1080`. On the login page, select **Forgot password?**, enter an active account email, and follow the captured link. Reset links expire after 30 minutes and can be used once.
+
+The SMTP host and port can be overridden with `HBFITESS_SMTP_HOST` and `HBFITESS_SMTP_PORT`. Password reset requests are unavailable to non-localhost connections.
 
 ---
 
@@ -513,8 +531,12 @@ Examples of application routes in the reviewed source:
 | Home | `?action=home` |
 | Login | `?action=login` |
 | Register | `?action=register` |
-| User Dashboard | `?action=dashboard` |
+| User Profile | `?action=profile` |
+| Legacy Dashboard | `?action=dashboard` (redirects to the role-appropriate destination) |
 | Admin Dashboard | `?action=admin_dashboard` |
+| Admin Profile | `?action=admin_profile` |
+| Forgot Password | `?action=forgot_password` |
+| Reset Password | `?action=reset_password&token=...` |
 | Blog | `?action=blog` |
 | Articles | `?action=articles` |
 | Blog Admin | `?action=admin_blog_dashboard` |
@@ -523,6 +545,8 @@ Examples of application routes in the reviewed source:
 | Marketplace | `?action=store` |
 
 Some features require authentication or specific user permissions.
+
+After login, Admins are sent to the Backoffice Dashboard; Users and Coaches are sent to their Profile. Coaches retain a dedicated **Manage Sessions** entry, and the main Marketplace, Blog, Workouts, and Sessions links remain available.
 
 ---
 

@@ -113,6 +113,10 @@ $needsSetup = $needsSetup ?? false;
                 </button>
             </form>
 
+            <div class="text-center mt-3 small">
+                <a href="index.php?action=forgot_password">Forgot password?</a>
+            </div>
+
             <?php if ($needsSetup): ?>
                 <div class="mt-3 p-3 rounded-3 small" style="background:#0D0D10;border:1px solid var(--hb-border-accent);">
                     <strong class="text-coral"><i class="fa-solid fa-screwdriver-wrench me-1"></i>No admin account yet?</strong>

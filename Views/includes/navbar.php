@@ -17,8 +17,9 @@ if (is_object($currentUser) && method_exists($currentUser, 'getRoleName')) {
     $navUserName = (string)($currentUser['full_name'] ?? 'User');
 }
 
-$isActive     = static fn(string $page): string => $currentPage === $page ? 'active' : '';
-$isBlogActive = in_array($currentPage, ['blog', 'articles', 'my_comments', 'create_article'], true) ? 'active' : '';
+$isAuthenticated = $currentUser !== null;
+$isActive        = static fn(string $page): string => $currentPage === $page ? 'active' : '';
+$isBlogActive    = in_array($currentPage, ['blog', 'articles', 'my_comments', 'create_article'], true) ? 'active' : '';
 ?>
 <nav class="navbar navbar-expand-lg fo-navbar sticky-top">
     <div class="container">
@@ -36,11 +37,13 @@ $isBlogActive = in_array($currentPage, ['blog', 'articles', 'my_comments', 'crea
 
         <div class="collapse navbar-collapse" id="foNavMenu">
             <ul class="navbar-nav mx-auto gap-1">
-                <li class="nav-item">
-                    <a class="nav-link <?= $isActive('home') ?>" href="index.php?action=home">
-                        <i class="fa-solid fa-house me-1"></i> Home
-                    </a>
-                </li>
+                <?php if (!$isAuthenticated): ?>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $isActive('home') ?>" href="index.php?action=home">
+                            <i class="fa-solid fa-house me-1"></i> Home
+                        </a>
+                    </li>
+                <?php endif; ?>
                 <li class="nav-item">
                     <a class="nav-link <?= $isActive('store') ?>" href="index.php?action=store">
                         <i class="fa-solid fa-shop me-1"></i> Marketplace
@@ -61,29 +64,19 @@ $isBlogActive = in_array($currentPage, ['blog', 'articles', 'my_comments', 'crea
                         <i class="fa-solid fa-person-running me-1"></i> Sessions
                     </a>
                 </li>
-                <?php if ($navUserRole !== null): ?>
+                <?php if ($navUserRole === 'coach'): ?>
                     <li class="nav-item">
-                        <a class="nav-link <?= $isActive('dashboard') ?>" href="index.php?action=dashboard">
-                            <i class="fa-solid fa-gauge-high me-1"></i> Dashboard
+                        <a class="nav-link <?= $isActive('admin_sessions') ?>" href="index.php?action=coach_sessions">
+                            <i class="fa-solid fa-calendar-check me-1"></i> Manage Sessions
                         </a>
                     </li>
+                <?php endif; ?>
+                <?php if ($isAuthenticated && $navUserRole !== 'admin'): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= $isActive('profile') ?>" href="index.php?action=profile">
                             <i class="fa-solid fa-id-card me-1"></i> Profile
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link <?= $isActive('edit_profile') ?>" href="index.php?action=edit_profile">
-                            <i class="fa-solid fa-user-pen me-1"></i> Edit Profile
-                        </a>
-                    </li>
-                    <?php if ($navUserRole === 'admin'): ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="index.php?action=admin_dashboard">
-                                <i class="fa-solid fa-shield-halved me-1 text-coral"></i> Backoffice
-                            </a>
-                        </li>
-                    <?php endif; ?>
                 <?php endif; ?>
             </ul>
 
@@ -94,6 +87,8 @@ $isBlogActive = in_array($currentPage, ['blog', 'articles', 'my_comments', 'crea
                         <?= htmlspecialchars((string)$navUserName, ENT_QUOTES, 'UTF-8') ?>
                         (<?= htmlspecialchars($navUserRole, ENT_QUOTES, 'UTF-8') ?>)
                     </span>
+                <?php endif; ?>
+                <?php if ($isAuthenticated): ?>
                     <a href="index.php?action=logout" class="btn btn-hb-outline btn-sm">
                         <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
                     </a>

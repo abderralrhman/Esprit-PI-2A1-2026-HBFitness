@@ -109,6 +109,11 @@ switch ($action) {
     // =========================================================================
     case 'home':
         $currentUser = $authController->getCurrentUser();
+        if ($currentUser) {
+            $destination = $currentUser->getRoleName() === 'admin' ? 'admin_dashboard' : 'profile';
+            header('Location: index.php?action=' . $destination);
+            exit;
+        }
         $stats       = $userController->getStats();
         $needsSetup  = AuthController::isLocalhost() && !$authController->hasAnyAdmin();
         $currentPage = 'home';
@@ -150,7 +155,7 @@ switch ($action) {
         if (AuthController::isAuthenticated()) {
             $me = $authController->getCurrentUser();
             if ($me) {
-                header('Location: index.php?action=' . ($me->getRoleName() === 'admin' ? 'admin_dashboard' : 'dashboard'));
+                header('Location: index.php?action=' . ($me->getRoleName() === 'admin' ? 'admin_dashboard' : 'profile'));
                 exit;
             }
         }
@@ -160,7 +165,7 @@ switch ($action) {
             $old['email'] = trim((string)($_POST['email'] ?? ''));
             $errors       = $authController->login($_POST);
             if (empty($errors)) {
-                $target = (($_SESSION['role'] ?? '') === 'admin') ? 'admin_dashboard' : 'dashboard';
+                $target = (($_SESSION['role'] ?? '') === 'admin') ? 'admin_dashboard' : 'profile';
                 AuthController::flash('Welcome back, ' . ($_SESSION['full_name'] ?? 'Athlete') . '!');
                 header('Location: index.php?action=' . $target);
                 exit;
@@ -173,9 +178,43 @@ switch ($action) {
         require __DIR__ . '/Views/Frontoffice/login.php';
         break;
 
+    case 'forgot_password':
+        $errors = [];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $errors = $authController->requestPasswordReset($_POST);
+            if (empty($errors)) {
+                AuthController::flash('If an active account matches that email, a reset link has been sent to the local test inbox.');
+                header('Location: index.php?action=login');
+                exit;
+            }
+        }
+        $csrfToken   = $authController->getCsrfToken();
+        $currentUser = null;
+        $currentPage = 'forgot_password';
+        require __DIR__ . '/Views/Frontoffice/forgotPassword.php';
+        break;
+
+    case 'reset_password':
+        $token = trim((string)($_POST['token'] ?? $_GET['token'] ?? ''));
+        $errors = [];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $errors = $authController->resetPassword($token, $_POST);
+            if (empty($errors)) {
+                AuthController::flash('Your password has been reset. You can now log in.');
+                header('Location: index.php?action=login');
+                exit;
+            }
+        }
+        $isValidToken = $authController->isPasswordResetTokenValid($token);
+        $csrfToken    = $authController->getCsrfToken();
+        $currentUser  = null;
+        $currentPage  = 'reset_password';
+        require __DIR__ . '/Views/Frontoffice/resetPassword.php';
+        break;
+
     case 'register':
         if (AuthController::isAuthenticated()) {
-            header('Location: index.php?action=dashboard');
+            header('Location: index.php?action=profile');
             exit;
         }
         $errors = [];
@@ -265,19 +304,26 @@ switch ($action) {
     // =========================================================================
     case 'dashboard':
         $currentUser = $authController->requireAuth();
-        $stats       = $userController->getStats();
-        $currentPage = 'dashboard';
-        require __DIR__ . '/Views/Frontoffice/dashboard.php';
-        break;
+        $destination = $currentUser->getRoleName() === 'admin' ? 'admin_dashboard' : 'profile';
+        header('Location: index.php?action=' . $destination);
+        exit;
 
     case 'profile':
         $currentUser = $authController->requireAuth();
+        if ($currentUser->getRoleName() === 'admin') {
+            header('Location: index.php?action=admin_profile');
+            exit;
+        }
         $currentPage = 'profile';
         require __DIR__ . '/Views/Frontoffice/profile.php';
         break;
 
     case 'edit_profile':
         $currentUser = $authController->requireAuth();
+        if ($currentUser->getRoleName() === 'admin') {
+            header('Location: index.php?action=admin_edit_profile');
+            exit;
+        }
         $errors      = [];
         $old         = [
             'full_name' => $currentUser->getFullName(),
@@ -480,6 +526,38 @@ switch ($action) {
         // Fallback to admin_dashboard
         header('Location: index.php?action=admin_dashboard');
         exit;
+
+    case 'admin_profile':
+        $currentUser = $authController->requireRole('admin');
+        $currentPage = 'admin_profile';
+        require __DIR__ . '/Views/Backoffice/profile.php';
+        break;
+
+    case 'admin_edit_profile':
+        $currentUser = $authController->requireRole('admin');
+        $errors      = [];
+        $old         = [
+            'full_name' => $currentUser->getFullName(),
+            'email'     => $currentUser->getEmail(),
+            'phone'     => $currentUser->getPhone() ?? '',
+        ];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $old = [
+                'full_name' => trim((string)($_POST['full_name'] ?? '')),
+                'email'     => trim((string)($_POST['email'] ?? '')),
+                'phone'     => trim((string)($_POST['phone'] ?? '')),
+            ];
+            $errors = $userController->updateOwnProfile($currentUser->getId(), $_POST);
+            if (empty($errors)) {
+                AuthController::flash('Your administrator profile has been updated successfully.');
+                header('Location: index.php?action=admin_profile');
+                exit;
+            }
+        }
+        $csrfToken   = $authController->getCsrfToken();
+        $currentPage = 'admin_profile';
+        require __DIR__ . '/Views/Backoffice/editProfile.php';
+        break;
 
     case 'admin_dashboard':
         $currentUser = $authController->requireRole('admin');
