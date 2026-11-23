@@ -1,153 +1,211 @@
-# HB FITNESS — Project Integration 
-
-> **Train smart. Reuse more.**
-> Web Technologies 2A Integrated Project (ESPRIT School of Engineering, 2026–2027).
-> Integrated Modules: **User Management & Authentication** + **Sports Equipment Marketplace**.
-
----
-
-## Table of Contents
-
-- [Overview](#overview)
-- [Integrated Modules](#integrated-modules)
-  - [1. User Management & Security Core](#1-user-management--security-core)
-  - [2. Sports Marketplace & Orders](#2-sports-marketplace--orders)
-- [Tech Stack & Architecture](#tech-stack--architecture)
-- [Setup & Installation with XAMPP](#setup--installation-with-xampp)
-- [Demo Data for Testing](#demo-data-for-testing)
-- [Database Configuration](#database-configuration)
-- [Routing & Navigation](#routing--navigation)
-- [Contributors](#contributors)
-- [Academic Context](#academic-context)
-
----
-
-## Overview
-
-**HB FITNESS** is a sustainable fitness platform built following strict ESPRIT MVC guidelines.
-This repository brings together:
-* The **User Management System** (Authentication, User Roles, Backoffice Administration, Secure Sessions).
-* The **Atelier Market** (Sports equipment listings, category filters, interactive order tracking, public storefront).
-* **Workout Programs** (plans filtered by level and goal, detailed exercise lists, and admin plan management).
-
----
-
-## Integrated Modules
-
-### 1. User Management & Security Core
-* **Backoffice User Management**: Complete CRUD for accounts with roles (`admin`, `coach`, `user`) and account statuses (`active`, `suspended`).
-* **Frontoffice Experience**: Member registration, email/password login, athlete dashboard, and profile management.
-* **Security Workshop Standard**:
-  * 100% PDO prepared statements.
-  * `password_hash()` and `password_verify()`.
-  * Cryptographic CSRF tokens on all POST requests.
-  * Hardened session cookies (`HttpOnly`, `SameSite=Lax`, strict mode).
-  * HTTP security headers (`X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, CSP).
-
-### 2. Sports Marketplace & Orders
-* **Storefront (`?action=store` / `?page=store`)**: Public marketplace to browse fitness gear, filter by categories, search products, and submit reservations.
-* **Market Admin (`?action=market_admin` / `?page=admin`)**: Full dashboard managing listings, tracking order states (`To process` → `Shipped` → `Completed`), category management, and CSV export.
-* **REST API (`api.php`)**: JSON backend powering asynchronous CRUD operations and interactive widgets.
-
-### 3. Workout Programs
-* **Plan library (`?action=workouts`)**: Public workout plans filtered by experience level and fitness goal, with exercise lists and optional video links.
-* **Workout administration (`?action=admin_workouts`)**: Administrator-only CRUD for workout plans and their exercises.
-* **PHP-managed schema**: The application creates the `workout_plans` and `exercises` tables in the user database connection; no workout SQL import is required.
-
----
-
-## Tech Stack & Architecture
-
-* **Backend**: PHP 8+ (Strict typing, OOP, PDO, Singleton Database connection)
-* **Frontend**: Bootstrap 5.3, Font Awesome 6, Vanilla JS, CSS3
-* **Database**: MySQL / MariaDB (InnoDB, UTF8MB4)
-* **Design Identity**: Black `#030303`, Crimson `#910329`, Charcoal `#1A1A1D`, Coral Red `#E8405E`
-
-### MVC Project Directory Structure
-
-```text
+HB FITNESS
+Train smart. Eat well. Reuse more.
+Academic Year: 2026–2027
+Institution: Esprit School of Engineering – Tunisia
+Program: Integrated Project (PI), Web Technologies — Second Year (2A)
+Project status: In development — module integration and end-to-end validation ongoing.
+README draft for team review. It describes the source files currently present in the uploaded project snapshot. It is not a claim that all modules have passed live testing.
+Overview
+HB FITNESS is a web platform focused on fitness, healthy living, and the reuse of sports equipment. Its broader vision combines workout programs, nutrition, community content, events, coaching sessions, and a marketplace for second-hand sports gear.
+The current source snapshot contains code for User Management, Blog Management, and Sports Equipment Marketplace. Other planned modules may be developed on teammates' branches and are not claimed as integrated here.
+Table of Contents
+Features
+Tech Stack
+Architecture
+Database
+Getting Started
+Using the Application
+Authentication and Permissions
+Security
+Testing and Current Status
+Collaboration and Contributions
+Contributors
+Academic Context
+Acknowledgments
+License
+Features
+1. Blog Management — Article & Comment
+Module responsibility: Abdulrahman (team leader; confirm exact name spelling before publication).
+The Blog module has two main entities, Article and Comment, with a one-to-many (1:N) relationship. One article may have several comments.
+Implemented in the source code:
+Article CRUD: create, list/view, update, and delete articles.
+Comment CRUD: add, view, update, and delete comments.
+Front Office: article listings, article details, comments, and My Comments.
+Back Office: article management, comment moderation, and Blog statistics.
+PDO queries and SQL JOINs connecting articles, comments, and author information.
+Input validation, CSRF checks, and server-side role/ownership checks.
+Blog roles currently reflected in the code:
+Role	Blog permissions
+Visitor	Read articles and visible comments.
+User	Read articles; add, edit, and delete their own comments.
+Coach	User comment permissions; create and manage their own articles.
+Admin	Manage all articles and moderate comments.
+These permissions must still be verified with real users in the final shared authentication system.
+2. User Management & Authentication
+Implemented in the source code:
+User CRUD and administration.
+Registration, email/password login, and logout.
+Roles: admin, user, coach.
+Account statuses: active, suspended.
+User profile management, session handling, and role checks.
+Integration check pending: confirm that every module uses the same up-to-date role and account status, particularly after an administrator changes or suspends a user.
+3. Sports Equipment Marketplace
+Present in the current source snapshot:
+Public equipment storefront and category filtering.
+Marketplace listings, categories, and orders.
+Admin interface and JSON API endpoints.
+Integration and security review pending: marketplace database identity, admin-route protection, and API authorization/CSRF controls must be verified and corrected as needed.
+4. Other Planned Modules
+The HB FITNESS team project also plans Nutrition & Recipes, Workout Programs, Events & Sponsors, and Coaching Sessions. Their implementation status must be confirmed from each contributor's actual branch or pull request before being marked complete.
+Tech Stack
+Frontend
+HTML5 and CSS3
+Bootstrap 5
+JavaScript (Vanilla JS)
+Responsive Front Office and Back Office layouts
+Backend
+PHP 8+ and Object-Oriented Programming (OOP)
+MVC pattern (Model–View–Controller)
+PHP Data Objects (PDO) with prepared statements
+MySQL / MariaDB
+XAMPP (local Apache and MySQL environment)
+Branding
+The HB FITNESS visual identity uses Black #030303, Crimson #910329, Silver #B4B4B4, Charcoal #1A1A1D, and Coral Red #E8405E, with Oswald and DM Sans typography where available.
+Architecture
+The application uses a PHP MVC structure:
+Models: data entities and supporting data-access components.
+Controllers: request handling, business logic, validation, and database operations.
+Views: presentation pages, forms, reusable layouts, and partials.
+index.php: shared front controller and application router.
+Current high-level source structure:
 HBfitess/
-├── config/
-│   └── database.php            # Singleton Database connection (ESPRIT MVC)
 ├── Controllers/
-│   ├── AuthController.php      # Authentication, CSRF, sessions, role guards
-│   ├── UserController.php      # User CRUD & SQL JOIN operations
-│   ├── RoleController.php      # Roles & status management
-│   ├── WorkoutController.php   # Workout plan and exercise CRUD
-│   ├── PageController.php      # Marketplace storefront and admin controller
-│   └── ApiController.php       # Marketplace REST API controller
+│   ├── Blog/
+│   │   ├── ArticleController.php
+│   │   ├── CommentController.php
+│   │   └── BlogAuthAdapter.php
+│   ├── AuthController.php
+│   ├── UserController.php
+│   ├── RoleController.php
+│   ├── PageController.php
+│   └── ApiController.php
 ├── Models/
-│   ├── User.php                # User entity
-│   ├── Role.php                # Role entity
-│   ├── UserStatus.php          # Status entity
-│   ├── WorkoutPlan.php         # Workout plan entity
-│   ├── Exercise.php            # Workout exercise entity
-│   └── MarketplaceRepository.php # Marketplace PDO data access
+│   ├── Blog/
+│   │   ├── Article.php
+│   │   └── Comment.php
+│   ├── User.php
+│   ├── Role.php
+│   ├── UserStatus.php
+│   └── MarketplaceRepository.php
 ├── Views/
-│   ├── Frontoffice/            # User frontoffice templates (home, login, register, profile)
-│   ├── Backoffice/             # User backoffice templates (dashboard, users, roles)
-│   ├── front/                  # Marketplace storefront view (store.php)
-│   ├── admin/                  # Marketplace admin dashboard (dashboard.php)
-│   ├── includes/               # Reusable partials (navbar, sidebar, header, footer)
-│   ├── layout.php              # Frontoffice master template
-│   └── layout_admin.php        # Backoffice master template
-├── api.php                     # Marketplace API entry point
-├── db.php                      # Legacy database helper bridge
-├── index.php                   # Unified Front Controller & Router
-├── hbfitess.sql                # User management schema & seed data
-└── marketplace_setup.sql       # Marketplace schema & seed data
-```
-
----
-
-## Setup & Installation with XAMPP
-
-1. Place the project inside your XAMPP web root:
-   ```text
-   C:\xampp\htdocs\ali - Copy\
-   ```
-2. Start **Apache** and **MySQL** in the XAMPP Control Panel.
-3. Open phpMyAdmin at `http://localhost/phpmyadmin/`.
-4. Import `hbfitess.sql` to create the main `hbfitess_db` user-management database.
-   The Marketplace creates its `hb_fitness` database and required tables in PHP the
-   first time it is opened. The MySQL account configured for the Marketplace must
-   have permission to create databases when `hb_fitness` does not exist.
-5. Open your browser:
-   * **Homepage & Authentication**: `http://localhost/ali%20-%20Copy/index.php?action=home`
-   * **Marketplace Storefront**: `http://localhost/ali%20-%20Copy/index.php?action=store` (or `?page=store`)
-   * **Marketplace Admin**: `http://localhost/ali%20-%20Copy/index.php?action=market_admin` (or `?page=admin`)
-   * **User Backoffice**: `http://localhost/ali%20-%20Copy/index.php?action=admin_dashboard`
-
-## Demo Data for Testing
-
-After importing the user schema and starting MySQL, populate all modules with local
-test records from a terminal:
-
-```powershell
-C:\xampp\php\php.exe seed_demo_data.php
-```
-
-The CLI-only script is safe to rerun: it reuses its reserved QA accounts and
-avoids duplicating demo plans, articles, comments, sessions, bookings, listings,
-and orders. On the first run, it creates QA admin, coach, and member accounts
-with random passwords and prints those passwords once. Keep them locally; they
-are not stored in the repository. The script also runs the marketplace schema
-and sample-data setup.
-
----
-
-## Contributors
-
-* **Abdulrahman** (Team Leader)
-* **Ali** (Marketplace Module)
-* **Sofiane**
-* **Mouadh**
-* **Hanine**
-* **Meriem**
-
----
-
-## Academic Context
-
-* **Institution**: Esprit School of Engineering – Tunisia
-* **Course**: Web Technologies 2A (Projet Intégré 2026–2027)
+│   ├── Frontoffice/blog/
+│   ├── Backoffice/blog/
+│   ├── Frontoffice/
+│   ├── Backoffice/
+│   ├── front/
+│   ├── admin/
+│   ├── includes/
+│   ├── assets/
+│   ├── layout.php
+│   └── layout_admin.php
+├── config/database.php
+├── index.php
+├── api.php
+├── db.php
+├── blog.sql
+├── hbfitess.sql
+├── marketplace_setup.sql
+└── README.md
+Some directories contain additional CSS, JavaScript, and image assets. Paths above describe the uploaded integration snapshot, not a proposed restructure.
+Database
+The repository currently includes separate SQL files:
+File	Purpose	Current state
+hbfitess.sql	Creates hbfitess_db and the users, roles, and account-status tables.	Present in source.
+blog.sql	Creates articles and comments linked to the shared users table.	Present; import into the database holding the compatible users table.
+marketplace_setup.sql	Creates a separate hb_fitness database for marketplace data.	Present; shared-database integration remains pending.
+Blog relationships:
+articles.author_id → users.id
+comments.article_id → articles.id
+comments.user_id → users.id
+articles.recipe_id is nullable for possible future Nutrition integration.
+Important: The team must reconcile the Marketplace database schema with the shared user identities before claiming one fully unified database. Never import SQL over existing data without a backup and schema review.
+Getting Started
+Prerequisites
+XAMPP with PHP 8+ and MySQL/MariaDB
+Browser
+Git (recommended)
+A local copy of the project
+Local Installation (Current Integration Snapshot)
+Place the project in C:\xampp\htdocs\HBfitess\ (or adjust the URL to match its actual folder name).
+Start Apache and MySQL in XAMPP.
+Open http://localhost/phpmyadmin/.
+On a new local database only, import hbfitess.sql, then select hbfitess_db and import blog.sql. Confirm the SQL import succeeded.
+Review config/database.php for the User/Blog PDO connection. Its default database name is hbfitess_db; optional environment variables begin with HBFITESS_DB_.
+Marketplace requires separate setup for now: inspect marketplace_setup.sql and db.php before importing/connecting hb_fitness. This is not yet a unified database setup.
+Open http://localhost/HBfitess/index.php?action=home.
+Do not run these imports against an existing team database without backing it up. These steps describe source configuration; they have not been verified on this review environment's running XAMPP instance.
+Initial Account Setup
+The current source includes a localhost-only ?action=setup route for creating initial accounts when no administrator exists. This is development setup infrastructure and must be reviewed/disabled before a public deployment. Use secure passwords; do not commit passwords or real user information.
+Using the Application
+The following routes are defined in the current index.php:
+Area	Local route
+Home	?action=home
+Login	?action=login
+Register	?action=register
+User Dashboard	?action=dashboard
+Admin Dashboard	?action=admin_dashboard
+Blog Home	?action=blog
+Article Listing	?action=articles
+Blog Admin Dashboard	?action=admin_blog_dashboard
+Manage Blog Articles	?action=admin_articles
+Manage Comments	?action=admin_comments
+Marketplace Store	?action=store
+Marketplace Admin	?action=market_admin
+Append each query to http://localhost/HBfitess/index.php if you use the suggested folder name. Some routes require login and specific permissions.
+Authentication and Permissions
+The application has three registered roles: Admin, User, and Coach. Login uses email and password; roles must be loaded from trusted server-side account data, not selected by a visitor. The Blog applies ownership rules to user comments and coach articles.
+Known integration task: Reconnect Blog authorization to the shared User Management controller so role changes and suspended statuses are checked against current database records, not only a potentially stale session snapshot.
+Security
+The current code includes security-related measures such as:
+PDO prepared statements in the Blog/User paths.
+Password hashing and verification in authentication flows.
+Session configuration and inactivity timeout.
+CSRF tokens and request validation in Blog operations.
+Output escaping and ownership checks in Blog views/controllers.
+Security is not yet signed off: cross-module authorization, Marketplace API protection, role/session freshness, and final browser-based security testing are pending.
+Testing and Current Status
+Item	Code inspection	Live XAMPP verification
+Article and Comment Models	Present	Not applicable
+Article CRUD	Present	Requires final integration test
+Comment CRUD	Present	Requires final integration test
+SQL JOIN queries	Present	Requires database execution test
+Blog Front/Back Office	Present	Requires route/UI test
+Blog validation and authorization	Present	Requires permission/security test
+User Management	Present	Requires regression test
+Marketplace	Present	Requires database/security integration work
+In the source review, 53 PHP files passed PHP syntax checks. This does not prove database or browser functionality.
+Next Priorities
+Verify shared Blog/User authentication, especially changed roles and suspended users.
+Complete the XAMPP Article/Comment CRUD, JOIN, and role-permission test checklist.
+Resolve the separate Marketplace database/user model and protect its admin/API routes.
+Validate cross-module navigation, document screenshots and results, and review integration through pull requests.
+Collaboration and Contributions
+The project uses GitHub branches, issues, pull requests, and the HB Fitness Board to track work. Each team member should own and document their assigned module; an issue should be marked Done only when its stated acceptance criteria are met.
+Recommended workflow: create a dedicated feature branch, make focused commits, open a pull request, review integration conflicts, test the combined application, then merge after approval. Never force-push over teammates' work.
+Contributors
+Contributor	Assigned module (from project presentation)
+Abdulrahman	Team leader — Blog (Article & Comment)
+Meriem	Nutrition & Recipes
+Sofiane	Workout Programs
+Mouadh	Events & Sponsors
+Ali	Used-equipment Marketplace
+Hanine	Coaching Sessions
+Note: Roles above identify planned ownership; they do not assert all modules are implemented or integrated. The shared User Management contributor(s) should be confirmed by the team before publication.
+Academic Context
+Developed at Esprit School of Engineering – Tunisia
+Academic Year: 2026–2027
+Project: Integrated Project (PI), Web Technologies, Second Year (2A)
+Acknowledgments
+We thank our ESPRIT instructors and project supervisors for their guidance, course workshops, and validation feedback.
+License
+To be decided by the team. No license is claimed until an appropriate LICENSE file is added to the repository.
