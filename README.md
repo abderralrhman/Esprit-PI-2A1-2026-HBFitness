@@ -636,7 +636,7 @@ Encouraging more sustainable consumption habits.
 
 | Team Member | Responsibility |
 |---|---|
-| Abdulrahman | Team Leader — Blog Management |
+| Abdulrahman | Blog Management |
 | Meriem | Nutrition & Recipes |
 | Sofiane | Workout Programs |
 | Mouadh | Events & Sponsors |
