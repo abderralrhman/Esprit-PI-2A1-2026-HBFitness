@@ -60,6 +60,10 @@ switch ($action) {
     // =========================================================================
     case 'home':
         $currentUser = $authController->getCurrentUser();
+        if ($currentUser) {
+            header('Location: index.php?action=' . ($currentUser->getRoleName() === 'admin' ? 'admin_dashboard' : 'profile'));
+            exit;
+        }
         $stats       = $userController->getStats();
         $needsSetup  = AuthController::isLocalhost() && !$authController->hasAnyAdmin();
         $currentPage = 'home';
@@ -97,7 +101,7 @@ switch ($action) {
         if (AuthController::isAuthenticated()) {
             $me = $authController->getCurrentUser();
             if ($me) {
-                header('Location: index.php?action=' . ($me->getRoleName() === 'admin' ? 'admin_dashboard' : 'dashboard'));
+                header('Location: index.php?action=' . ($me->getRoleName() === 'admin' ? 'admin_dashboard' : 'profile'));
                 exit;
             }
         }
@@ -107,8 +111,14 @@ switch ($action) {
             $old['email'] = trim((string)($_POST['email'] ?? ''));
             $errors       = $authController->login($_POST);
             if (empty($errors)) {
-                $target = (($_SESSION['role'] ?? '') === 'admin') ? 'admin_dashboard' : 'dashboard';
-                AuthController::flash('Welcome back, ' . ($_SESSION['full_name'] ?? 'Athlete') . '!');
+                $role   = (string)($_SESSION['role'] ?? 'user');
+                $target = $role === 'admin' ? 'admin_dashboard' : 'profile';
+                $roleLabel = match ($role) {
+                    'admin' => 'Administrator',
+                    'coach' => 'Coach',
+                    default => 'Member',
+                };
+                AuthController::flash('Welcome back, ' . ($_SESSION['full_name'] ?? $roleLabel) . '!');
                 header('Location: index.php?action=' . $target);
                 exit;
             }
@@ -120,9 +130,58 @@ switch ($action) {
         require __DIR__ . '/Views/Frontoffice/login.php';
         break;
 
+    case 'forgot_password':
+        if (!AuthController::isLocalhost()) {
+            http_response_code(404);
+            exit('Not found.');
+        }
+        if (AuthController::isAuthenticated()) {
+            $me = $authController->getCurrentUser();
+            if ($me) {
+                header('Location: index.php?action=' . ($me->getRoleName() === 'admin' ? 'admin_dashboard' : 'profile'));
+                exit;
+            }
+        }
+        $errors    = [];
+        $submitted = false;
+        $old       = ['email' => ''];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $old['email'] = trim((string)($_POST['email'] ?? ''));
+            $errors = $authController->requestPasswordReset($_POST);
+            $submitted = empty($errors);
+        }
+        $csrfToken   = $authController->getCsrfToken();
+        $currentUser = null;
+        $currentPage = 'forgot_password';
+        require __DIR__ . '/Views/Frontoffice/forgotPassword.php';
+        break;
+
+    case 'reset_password':
+        if (!AuthController::isLocalhost()) {
+            http_response_code(404);
+            exit('Not found.');
+        }
+        $token = (string)($_POST['token'] ?? $_GET['token'] ?? '');
+        $errors = [];
+        $isValidToken = $authController->isPasswordResetTokenValid($token);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $errors = $authController->resetPassword($token, $_POST);
+            if (empty($errors)) {
+                AuthController::flash('Your password has been reset. You can now log in.');
+                header('Location: index.php?action=login');
+                exit;
+            }
+        }
+        $csrfToken   = $authController->getCsrfToken();
+        $currentUser = null;
+        $currentPage = 'reset_password';
+        require __DIR__ . '/Views/Frontoffice/resetPassword.php';
+        break;
+
     case 'register':
         if (AuthController::isAuthenticated()) {
-            header('Location: index.php?action=dashboard');
+            $me = $authController->getCurrentUser();
+            header('Location: index.php?action=' . ($me && $me->getRoleName() === 'admin' ? 'admin_dashboard' : 'profile'));
             exit;
         }
         $errors = [];
@@ -158,19 +217,30 @@ switch ($action) {
     // =========================================================================
     case 'dashboard':
         $currentUser = $authController->requireAuth();
-        $stats       = $userController->getStats();
-        $currentPage = 'dashboard';
-        require __DIR__ . '/Views/Frontoffice/dashboard.php';
+        if ($currentUser->getRoleName() === 'admin') {
+            header('Location: index.php?action=admin_dashboard');
+            exit;
+        }
+        header('Location: index.php?action=profile');
+        exit;
         break;
 
     case 'profile':
         $currentUser = $authController->requireAuth();
+        if ($currentUser->getRoleName() === 'admin') {
+            header('Location: index.php?action=admin_dashboard');
+            exit;
+        }
         $currentPage = 'profile';
         require __DIR__ . '/Views/Frontoffice/profile.php';
         break;
 
     case 'edit_profile':
         $currentUser = $authController->requireAuth();
+        if ($currentUser->getRoleName() === 'admin') {
+            header('Location: index.php?action=admin_dashboard');
+            exit;
+        }
         $errors      = [];
         $old         = [
             'full_name' => $currentUser->getFullName(),
@@ -198,6 +268,38 @@ switch ($action) {
     // =========================================================================
     // BACKOFFICE PROTECTED ROUTES (Admin ONLY)
     // =========================================================================
+    case 'admin_profile':
+        $currentUser = $authController->requireRole('admin');
+        $currentPage = 'admin_profile';
+        require __DIR__ . '/Views/Backoffice/profile.php';
+        break;
+
+    case 'admin_edit_profile':
+        $currentUser = $authController->requireRole('admin');
+        $errors      = [];
+        $old         = [
+            'full_name' => $currentUser->getFullName(),
+            'email'     => $currentUser->getEmail(),
+            'phone'     => $currentUser->getPhone() ?? '',
+        ];
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $old = [
+                'full_name' => trim((string)($_POST['full_name'] ?? '')),
+                'email'     => trim((string)($_POST['email'] ?? '')),
+                'phone'     => trim((string)($_POST['phone'] ?? '')),
+            ];
+            $errors = $userController->updateOwnProfile($currentUser->getId(), $_POST);
+            if (empty($errors)) {
+                AuthController::flash('Your administrator profile has been updated successfully.');
+                header('Location: index.php?action=admin_profile');
+                exit;
+            }
+        }
+        $csrfToken   = $authController->getCsrfToken();
+        $currentPage = 'admin_profile';
+        require __DIR__ . '/Views/Backoffice/editProfile.php';
+        break;
+
     case 'admin_dashboard':
         $currentUser = $authController->requireRole('admin');
         $stats       = $userController->getStats();

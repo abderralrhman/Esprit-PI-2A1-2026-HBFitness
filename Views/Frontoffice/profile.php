@@ -57,9 +57,6 @@ ob_start();
         </div>
 
         <div class="d-flex justify-content-between align-items-center mt-4 pt-3" style="border-top:1px solid var(--hb-border);">
-            <a href="index.php?action=dashboard" class="btn btn-hb-dark">
-                <i class="fa-solid fa-arrow-left me-1"></i> Back to Dashboard
-            </a>
             <a href="index.php?action=logout" class="btn btn-hb-outline">
                 <i class="fa-solid fa-right-from-bracket me-1"></i> Logout
             </a>

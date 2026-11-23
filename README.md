@@ -36,7 +36,7 @@
 - **Role & Account Status Management**
   - Visual role/status summary cards powered by SQL `LEFT JOIN` counts and inline role/status assignment.
 - **Frontoffice Member Experience**
-  - Public homepage, Email + Password login, public registration (strictly creating `user` accounts), personal dashboard (User & Coach views), profile viewer, and self-service profile editor.
+  - Public homepage for visitors, Email + Password login, public registration (strictly creating `user` accounts), role-specific Profile pages, and self-service profile editor.
 - **Template Integration**
   - Reusable partials (`head.php`, `navbar.php`, `sidebar.php`, `header.php`, `footer.php`, `scripts.php`) assembled through `Views/layout.php` and `Views/layout_admin.php`.
 
@@ -66,13 +66,14 @@ HBfitess/
 ├── Views/
 │   ├── layout.php              # Frontoffice layout
 │   ├── layout_admin.php        # Backoffice layout
-│   ├── Frontoffice/            # home, login, register, dashboard, profile, editProfile
-│   ├── Backoffice/             # dashboard, listUsers, createUser, updateUser, deleteUser, manageRoles
+│   ├── Frontoffice/            # home, login, register, forgot/reset password, profile
+│   ├── Backoffice/             # dashboard, profile, editProfile, listUsers, createUser, updateUser, deleteUser, manageRoles
 │   ├── includes/               # head, navbar, sidebar, header, footer, scripts
 │   └── assets/                 # css/, js/, images/
 ├── config/
 │   └── database.php            # Centralized Singleton PDO connection
 ├── hbfitess.sql                # Importable phpMyAdmin SQL schema
+├── composer.json               # PHP dependencies (PHPMailer)
 ├── index.php                   # Main front controller / router
 ├── README.md
 └── .gitignore
@@ -99,7 +100,7 @@ Default local XAMPP credentials (`localhost`, `root`, empty password) can also b
 2. Open **phpMyAdmin** at `http://localhost/phpmyadmin`.
 3. Click the **Import** tab.
 4. Select `hbfitess.sql` from the root of `C:\xampp\htdocs\HBfitess\`.
-5. Click **Import** (or **Go**). This creates `hbfitess_db` with tables `roles`, `user_statuses`, and `users`, along with the required reference roles (`admin`, `user`, `coach`) and statuses (`active`, `suspended`).
+5. Click **Import** (or **Go**). This creates `hbfitess_db` with tables `roles`, `user_statuses`, `users`, and `password_reset_tokens`, along with the required reference roles (`admin`, `user`, `coach`) and statuses (`active`, `suspended`).
 
 ---
 
@@ -108,7 +109,8 @@ Default local XAMPP credentials (`localhost`, `root`, empty password) can also b
 1. Place this project folder at `C:\xampp\htdocs\HBfitess`.
 2. Open **XAMPP Control Panel** and start **Apache** and **MySQL**.
 3. Import `hbfitess.sql` in phpMyAdmin.
-4. Visit `http://localhost/HBfitess/` in your browser.
+4. From the project folder, install PHP dependencies with `composer install`.
+5. Visit `http://localhost/HBfitess/` in your browser.
 
 ---
 
@@ -118,8 +120,9 @@ Default local XAMPP credentials (`localhost`, `root`, empty password) can also b
 - **Registration (`index.php?action=register`)**: Public visitors can only register as normal `user` accounts with `active` status.
 - **Role-Based Redirection**:
   - `admin` → Backoffice Dashboard (`index.php?action=admin_dashboard`)
-  - `user` → Frontoffice Dashboard (`index.php?action=dashboard`)
-  - `coach` → Authorized Coach Frontoffice Dashboard (`index.php?action=dashboard`)
+  - `user` → Personal Profile (`index.php?action=profile`)
+  - `coach` → Personal Profile (`index.php?action=profile`)
+- **Local Password Reset Demo**: Reset emails are sent to a local MailCatcher SMTP server only. Reset links expire after 30 minutes, can be used once, and are never sent to real email.
 
 ---
 
@@ -147,6 +150,16 @@ No plaintext demo passwords are stored in this repository.
    - Coach (`coach@hbfitess.local`)
    - User (`user@hbfitess.local`)
 4. All passwords are immediately hashed with `password_hash()` in MySQL.
+
+### Testing Password Reset
+
+1. Start MailCatcher; it should listen on SMTP `127.0.0.1:1025` and web inbox `http://127.0.0.1:1080`.
+2. Open the login page on the local XAMPP machine and select **Forgot password?**
+3. Enter an active demo account email, such as `coach@hbfitess.local`.
+4. Open `http://127.0.0.1:1080` and follow the captured reset link.
+5. Choose a new password with at least 8 characters, including letters and digits.
+
+The app connects to MailCatcher using `HBFITESS_SMTP_HOST` and `HBFITESS_SMTP_PORT` (defaults: `127.0.0.1` and `1025`). Password reset is intentionally unavailable from non-localhost connections and does not send real email.
 
 ---
 

@@ -34,18 +34,10 @@ $boActive    = static fn(string $key): string => $currentPage === $key ? 'active
         <a href="index.php?action=admin_roles" class="bo-nav-link <?= $boActive('admin_roles') ?>">
             <i class="fa-solid fa-user-shield"></i> Roles &amp; Statuses
         </a>
-
-        <div class="bo-nav-label">Navigation</div>
-        <a href="index.php?action=dashboard" class="bo-nav-link">
-            <i class="fa-solid fa-arrow-up-right-from-square"></i> Frontoffice View
-        </a>
-        <a href="index.php?action=profile" class="bo-nav-link">
-            <i class="fa-solid fa-id-card"></i> My Profile
-        </a>
     </nav>
 
     <div class="bo-sidebar-footer">
-        <div class="d-flex align-items-center gap-2 mb-2">
+        <a href="index.php?action=admin_profile" class="d-flex align-items-center gap-2 mb-2 text-decoration-none text-white">
             <div class="hb-avatar" style="width:36px;height:36px;font-size:0.85rem;">
                 <?= htmlspecialchars($currentUser->getInitials(), ENT_QUOTES, 'UTF-8') ?>
             </div>
@@ -55,7 +47,7 @@ $boActive    = static fn(string $key): string => $currentPage === $key ? 'active
                 </div>
                 <div class="eyebrow" style="font-size:0.65rem;">Administrator</div>
             </div>
-        </div>
+        </a>
         <a href="index.php?action=logout" class="btn btn-hb-outline btn-sm w-100">
             <i class="fa-solid fa-right-from-bracket me-1"></i> Sign Out
         </a>
