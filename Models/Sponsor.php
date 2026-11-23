@@ -1,78 +1,43 @@
 <?php
 declare(strict_types=1);
 
-/**
- * Models/Sponsor.php
- * OOP Entity Model for HB FITNESS sponsors.
- */
-
+/** A sponsor and its optional public contact information. */
 class Sponsor
 {
-    private int $id;
-    private string $name;
-    private ?string $logo;
-    private ?string $website;
-    private ?string $contactEmail;
-    private int $eventsCount;
-
     public function __construct(
-        int $id = 0,
-        string $name = '',
-        ?string $logo = null,
-        ?string $website = null,
-        ?string $contactEmail = null,
-        int $eventsCount = 0
+        private int $id = 0,
+        private string $name = '',
+        private ?string $logo = null,
+        private ?string $website = null,
+        private ?string $contactEmail = null,
+        private ?string $createdAt = null,
+        private ?string $updatedAt = null
     ) {
-        $this->id = $id;
-        $this->name = $name;
-        $this->logo = $logo;
-        $this->website = $website;
-        $this->contactEmail = $contactEmail;
-        $this->eventsCount = $eventsCount;
     }
 
-    public function getId(): int
-    {
-        return $this->id;
-    }
+    public function getId(): int { return $this->id; }
+    public function getName(): string { return $this->name; }
+    public function getLogo(): ?string { return $this->logo; }
+    public function getWebsite(): ?string { return $this->website; }
+    public function getContactEmail(): ?string { return $this->contactEmail; }
+    public function getCreatedAt(): ?string { return $this->createdAt; }
+    public function getUpdatedAt(): ?string { return $this->updatedAt; }
 
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    public function getLogo(): ?string
-    {
-        return $this->logo;
-    }
-
-    public function getWebsite(): ?string
-    {
-        return $this->website;
-    }
-
-    public function getContactEmail(): ?string
-    {
-        return $this->contactEmail;
-    }
-
-    public function getEventsCount(): int
-    {
-        return $this->eventsCount;
-    }
-
+    /** Hydrate a complete persisted sponsor from an associative PDO row. */
     public static function fromArray(array $row): self
     {
+        if (!isset($row['id'], $row['name'], $row['created_at'], $row['updated_at'])) {
+            throw new InvalidArgumentException('Incomplete sponsor row.');
+        }
+
         return new self(
-            (int)($row['id'] ?? 0),
-            (string)($row['name'] ?? ''),
-            isset($row['logo']) && $row['logo'] !== ''
-                ? (string)$row['logo'] : null,
-            isset($row['website']) && $row['website'] !== ''
-                ? (string)$row['website'] : null,
-            isset($row['contact_email']) && $row['contact_email'] !== ''
-                ? (string)$row['contact_email'] : null,
-            (int)($row['events_count'] ?? 0)
+            id: (int) $row['id'],
+            name: (string) $row['name'],
+            logo: isset($row['logo']) ? (string) $row['logo'] : null,
+            website: isset($row['website']) ? (string) $row['website'] : null,
+            contactEmail: isset($row['contact_email']) ? (string) $row['contact_email'] : null,
+            createdAt: (string) $row['created_at'],
+            updatedAt: (string) $row['updated_at']
         );
     }
 }

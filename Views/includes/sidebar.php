@@ -43,6 +43,18 @@ $boActive    = static fn(string $key): string => $currentPage === $key ? 'active
             <i class="fa-solid fa-bag-shopping"></i> View Storefront
         </a>
 
+        <div class="bo-nav-label">Events &amp; Sponsors</div>
+        <a href="index.php?action=admin_events" class="bo-nav-link <?= in_array(
+            $currentPage, ['admin_events', 'admin_create_event', 'admin_update_event', 'admin_event_registrations'], true
+        ) ? 'active' : '' ?>">
+            <i class="fa-solid fa-calendar-days"></i> Events
+        </a>
+        <a href="index.php?action=admin_sponsors" class="bo-nav-link <?= in_array(
+            $currentPage, ['admin_sponsors', 'admin_create_sponsor', 'admin_update_sponsor'], true
+        ) ? 'active' : '' ?>">
+            <i class="fa-solid fa-handshake"></i> Sponsors
+        </a>
+
         <div class="bo-nav-label">Navigation</div>
         <a href="index.php?action=dashboard" class="bo-nav-link">
             <i class="fa-solid fa-arrow-up-right-from-square"></i> Frontoffice View

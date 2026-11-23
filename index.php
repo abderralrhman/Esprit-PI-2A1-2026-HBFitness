@@ -53,6 +53,42 @@ require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/Models/MarketplaceRepository.php';
 require_once __DIR__ . '/Controllers/PageController.php';
 
+// Module 4 routes share User Management's session and development database.
+$module4Action = $_GET['action'] ?? null;
+$module4SponsorActions = ['admin_sponsors', 'admin_create_sponsor', 'admin_update_sponsor', 'admin_delete_sponsor'];
+$module4EventActions = [
+    'events', 'event', 'event_register', 'event_cancel', 'admin_events',
+    'admin_create_event', 'admin_update_event', 'admin_delete_event', 'admin_event_registrations',
+];
+$isSponsorAction = in_array($module4Action, $module4SponsorActions, true);
+if ($isSponsorAction || in_array($module4Action, $module4EventActions, true)) {
+    require_once __DIR__ . '/Controllers/EventModuleRequest.php';
+    if (getenv('HBFITESS_DB_NAME') !== 'hbfitess_muadh_dev') {
+        EventModuleRequest::fail(503, 'Events & Sponsors requires the configured development database.');
+    }
+
+    require_once __DIR__ . '/Controllers/SponsorController.php';
+    require_once __DIR__ . '/Controllers/EventController.php';
+    [$flashMessage, $flashType] = AuthController::pullFlash();
+    try {
+        $authController = new AuthController();
+        $db = Database::getConnexion();
+        $sponsors = new SponsorRepository($db);
+        if ($isSponsorAction) {
+            (new SponsorController($authController, $sponsors))->handle($module4Action, $flashMessage, $flashType);
+        } else {
+            $events = new EventRepository($db, $sponsors);
+            $registrations = new EventRegistrationRepository($db, $events);
+            (new EventController($authController, $sponsors, $events, $registrations))
+                ->handle($module4Action, $flashMessage, $flashType);
+        }
+    } catch (PDOException $error) {
+        error_log('[HB FITNESS Events & Sponsors] ' . $error->getMessage());
+        EventModuleRequest::fail(500, 'Events & Sponsors is temporarily unavailable.');
+    }
+    return;
+}
+
 $authController = new AuthController();
 $userController = new UserController($authController);
 $roleController = new RoleController($authController);

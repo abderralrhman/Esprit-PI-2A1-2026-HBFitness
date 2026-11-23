@@ -1,77 +1,34 @@
 <?php
 declare(strict_types=1);
 
-/**
- * Models/EventRegistration.php
- * Pure OOP Entity Model for HB FITNESS event registrations.
- */
-
+/** An event registration associated with a User Management account ID. */
 class EventRegistration
 {
-    private int $id;
-    private int $eventId;
-    private int $userId;
-    private string $registeredAt;
-
     public function __construct(
-        int $id = 0,
-        int $eventId = 0,
-        int $userId = 0,
-        string $registeredAt = ''
+        private int $id = 0,
+        private int $eventId = 0,
+        private int $userId = 0,
+        private ?string $registeredAt = null
     ) {
-        $this->id = $id;
-        $this->eventId = $eventId;
-        $this->userId = $userId;
-        $this->registeredAt = $registeredAt;
     }
 
-    public function getId(): int
-    {
-        return $this->id;
-    }
+    public function getId(): int { return $this->id; }
+    public function getEventId(): int { return $this->eventId; }
+    public function getUserId(): int { return $this->userId; }
+    public function getRegisteredAt(): ?string { return $this->registeredAt; }
 
-    public function setId(int $id): void
-    {
-        $this->id = $id;
-    }
-
-    public function getEventId(): int
-    {
-        return $this->eventId;
-    }
-
-    public function setEventId(int $eventId): void
-    {
-        $this->eventId = $eventId;
-    }
-
-    public function getUserId(): int
-    {
-        return $this->userId;
-    }
-
-    public function setUserId(int $userId): void
-    {
-        $this->userId = $userId;
-    }
-
-    public function getRegisteredAt(): string
-    {
-        return $this->registeredAt;
-    }
-
-    public function setRegisteredAt(string $registeredAt): void
-    {
-        $this->registeredAt = $registeredAt;
-    }
-
+    /** Hydrate a complete persisted registration from an associative PDO row. */
     public static function fromArray(array $row): self
     {
+        if (!isset($row['id'], $row['event_id'], $row['user_id'], $row['registered_at'])) {
+            throw new InvalidArgumentException('Incomplete registration row.');
+        }
+
         return new self(
-            (int)($row['id'] ?? 0),
-            (int)($row['event_id'] ?? 0),
-            (int)($row['user_id'] ?? 0),
-            (string)($row['registered_at'] ?? '')
+            id: (int) $row['id'],
+            eventId: (int) $row['event_id'],
+            userId: (int) $row['user_id'],
+            registeredAt: (string) $row['registered_at']
         );
     }
 }

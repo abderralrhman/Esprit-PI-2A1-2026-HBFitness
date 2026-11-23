@@ -109,6 +109,47 @@ HBfitess/
 
 ---
 
+## Module 4 — Events & Sponsors
+
+The public Events page is `index.php?action=events`. Sign in as an active User Management account to register or cancel before an event starts. An administrator can open `index.php?action=admin_events` and `index.php?action=admin_sponsors` from the Backoffice sidebar.
+
+### XAMPP development setup
+
+1. Use PHP 8.1 or later with `pdo_mysql` and `mbstring`. Keep this snapshot in a separate XAMPP development copy.
+2. Configure the Apache environment for that copy with `HBFITESS_DB_NAME=hbfitess_muadh_dev` and the matching `HBFITESS_DB_HOST`, `HBFITESS_DB_USER`, and `HBFITESS_DB_PASS`. Set credentials in local Apache configuration outside the project archive. Use a MySQL account with privileges only on `hbfitess_muadh_dev`. The existing connection fallback can attempt to run the team setup script if a connection fails. The scoped account prevents it from writing to the team schema.
+3. Connect to `hbfitess_muadh_dev` with the same account in phpMyAdmin or the MySQL client and verify the schema. The development copy needs the plural `users`, `roles`, and `user_statuses` tables, as well as `sponsors`, `events`, and `event_registrations`. The team setup scripts explicitly select their own schemas. Use the existing development database for Module 4.
+4. Confirm the definitions with these read-only queries. Verify that the Module 4 tables and `users` use InnoDB before testing concurrent operations, and confirm `uk_event_user` covers `(event_id, user_id)`. Compare existing columns and timestamp defaults with `MODULE4_DATABASE_VERIFICATION.txt`.
+   ```sql
+   SELECT DATABASE();
+   SHOW CREATE TABLE hbfitess_muadh_dev.users;
+   SHOW CREATE TABLE hbfitess_muadh_dev.roles;
+   SHOW CREATE TABLE hbfitess_muadh_dev.user_statuses;
+   SHOW CREATE TABLE hbfitess_muadh_dev.sponsors;
+   SHOW CREATE TABLE hbfitess_muadh_dev.events;
+   SHOW CREATE TABLE hbfitess_muadh_dev.event_registrations;
+   ```
+5. The included `module4_setup.sql` is a reference and optional fresh setup for the three Module 4 tables. Review it and obtain approval before executing schema changes. The existing development tables can be used directly once verified.
+
+Event start times use Africa/Tunis. A capacity of zero closes registration. Sponsor logos are optional and use an existing asset path such as `Views/assets/images/hb-fitness-logo.svg`. Sponsors linked to events and events with registrations are protected from deletion. Registrations left behind by User Management account deletion still occupy a seat and appear as **Deleted account** in the admin participant list.
+
+### Local verification
+
+Run PHP lint from the project root in XAMPP PowerShell. Each file should report **No syntax errors detected**.
+
+```powershell
+Get-ChildItem -Recurse -Filter *.php | ForEach-Object { & 'C:\xampp\php\php.exe' -l $_.FullName }
+```
+
+| Area | Checks against `hbfitess_muadh_dev` |
+|---|---|
+| Sponsor CRUD | Create a sponsor, edit its details, and link an event. Confirm deletion is blocked while linked. Unlink it and confirm deletion succeeds. Try an invalid website and logo path. |
+| Event CRUD | Create future and past events, edit capacity and sponsor, and verify both public and admin displays. Check that an event with a registration cannot be deleted and capacity cannot be reduced below attendance. |
+| Registration | Use two separate active user sessions and a future event with one seat. Submit both registration forms at nearly the same time. Exactly one should succeed. Verify duplicate refusal, cancellation by the registered account, and cutoff when the event starts. |
+| Access and validation | Verify guest browsing, sign-in requirements for registration and cancellation, and denial for suspended users and non-admins on restricted routes. Submit a form missing its CSRF token and verify a 403. Try a malformed date or negative capacity with JavaScript disabled. |
+| Team-module regression | Sign in, open the profile and User Management pages as appropriate, and check existing navigation. Review the Marketplace links without submitting changes to any team database. |
+
+---
+
 ## Contributors
 
 * **Abdulrahman** (Team Leader)
