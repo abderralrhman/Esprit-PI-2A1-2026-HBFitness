@@ -1,4 +1,4 @@
-# HB FITNESS — Project Integration (User Management & Marketplace)
+# HB FITNESS — Project Integration 
 
 > **Train smart. Reuse more.**
 > Web Technologies 2A Integrated Project (ESPRIT School of Engineering, 2026–2027).
