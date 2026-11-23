@@ -50,7 +50,7 @@ HB Fitness is organized into six main functional modules, supported by a shared 
 
 ### Module 1 — Blog Management
 
-**Responsible: Abdulrahman — Team Leader**
+**Responsible: Abdulrahman**
 
 The Blog Management module allows users to explore fitness articles, share opinions, and interact with the fitness community.
 
