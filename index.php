@@ -49,6 +49,8 @@ require_once __DIR__ . '/Controllers/UserController.php';
 require_once __DIR__ . '/Controllers/RoleController.php';
 require_once __DIR__ . '/Controllers/WorkoutController.php';
 require_once __DIR__ . '/Controllers/SessionController.php';
+require_once __DIR__ . '/Models/RecipeRepository.php';
+require_once __DIR__ . '/Controllers/RecipeController.php';
 
 // Load Controllers & Repository (Marketplace)
 require_once __DIR__ . '/db.php';
@@ -351,6 +353,211 @@ switch ($action) {
     // =========================================================================
     // BACKOFFICE PROTECTED ROUTES (Admin ONLY)
     // =========================================================================
+    case 'recipes':
+        $currentUser      = $authController->getCurrentUser();
+        $recipeRepository = new RecipeRepository(Database::getConnexion());
+        $categories       = $recipeRepository->categories();
+        $activeCategory   = (int)($_GET['category'] ?? 0);
+        $search           = trim((string)($_GET['q'] ?? ''));
+        $recipes          = $recipeRepository->recipes($activeCategory > 0 ? $activeCategory : null, $search);
+        $currentPage      = 'recipes';
+        require __DIR__ . '/Views/Frontoffice/nutrition/recipes.php';
+        break;
+
+    case 'recipe_details':
+        $currentUser      = $authController->getCurrentUser();
+        $recipeRepository = new RecipeRepository(Database::getConnexion());
+        $recipeController = new RecipeController($recipeRepository);
+        $recipe           = $recipeRepository->find((int)($_GET['id'] ?? 0));
+        if (!$recipe) {
+            AuthController::flash('Recipe not found.', 'error');
+            header('Location: index.php?action=recipes');
+            exit;
+        }
+        $canManage   = $currentUser && $recipeController->canManage($currentUser, $recipe);
+        $csrfToken   = $authController->getCsrfToken();
+        $currentPage = 'recipes';
+        require __DIR__ . '/Views/Frontoffice/nutrition/recipeDetails.php';
+        break;
+
+    // =========================================================================
+    // NUTRITION BACKOFFICE ROUTES (Admin: everything | Coach: own recipes)
+    // =========================================================================
+    case 'admin_recipes':
+    case 'coach_recipes':
+        $currentUser = $authController->requireAuth();
+        if (!in_array($currentUser->getRoleName(), ['admin', 'coach'], true)) {
+            http_response_code(403);
+            echo '403 Access Denied';
+            break;
+        }
+        $recipeRepository = new RecipeRepository(Database::getConnexion());
+        $recipeController = new RecipeController($recipeRepository);
+        $isAdmin    = $currentUser->getRoleName() === 'admin';
+        $recipes    = $recipeRepository->recipes(null, null, $isAdmin ? null : $currentUser->getId());
+        $categories = $recipeRepository->categories();
+        $stats      = $recipeRepository->stats($isAdmin ? null : $currentUser->getId());
+        $editing    = null;
+        $errors     = [];
+        $old        = $recipeController->defaults();
+        $csrfToken  = $authController->getCsrfToken();
+        $currentPage = 'admin_recipes';
+        require __DIR__ . '/Views/Backoffice/nutrition/recipes.php';
+        break;
+
+    case 'admin_create_recipe':
+    case 'coach_create_recipe':
+        $currentUser = $authController->requireAuth();
+        if (!in_array($currentUser->getRoleName(), ['admin', 'coach'], true)) {
+            http_response_code(403);
+            echo '403 Access Denied';
+            break;
+        }
+        $recipeRepository = new RecipeRepository(Database::getConnexion());
+        $recipeController = new RecipeController($recipeRepository);
+        $isAdmin = $currentUser->getRoleName() === 'admin';
+        $errors  = [];
+        $old     = $recipeController->defaults();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $old = $recipeController->fromPost($_POST);
+            if (!$authController->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+                $errors['csrf'] = 'Your form has expired. Please try again.';
+            } else {
+                $errors = $recipeController->validate($old);
+                if (empty($errors)) {
+                    $recipeRepository->create(
+                        $recipeController->normalized($old),
+                        $recipeController->parseSteps($old['steps']),
+                        $currentUser->getId()
+                    );
+                    AuthController::flash('Recipe created successfully.');
+                    header('Location: index.php?action=' . ($isAdmin ? 'admin_recipes' : 'coach_recipes'));
+                    exit;
+                }
+            }
+        }
+        $recipes     = $recipeRepository->recipes(null, null, $isAdmin ? null : $currentUser->getId());
+        $categories  = $recipeRepository->categories();
+        $stats       = $recipeRepository->stats($isAdmin ? null : $currentUser->getId());
+        $editing     = null;
+        $csrfToken   = $authController->getCsrfToken();
+        $currentPage = 'admin_recipes';
+        require __DIR__ . '/Views/Backoffice/nutrition/recipes.php';
+        break;
+
+    case 'admin_edit_recipe':
+    case 'coach_edit_recipe':
+        $currentUser = $authController->requireAuth();
+        if (!in_array($currentUser->getRoleName(), ['admin', 'coach'], true)) {
+            http_response_code(403);
+            echo '403 Access Denied';
+            break;
+        }
+        $recipeRepository = new RecipeRepository(Database::getConnexion());
+        $recipeController = new RecipeController($recipeRepository);
+        $isAdmin = $currentUser->getRoleName() === 'admin';
+        $editing = $recipeRepository->find((int)($_GET['id'] ?? $_POST['id'] ?? 0));
+        if (!$editing || !$recipeController->canManage($currentUser, $editing)) {
+            AuthController::flash('Recipe not found or access denied.', 'error');
+            header('Location: index.php?action=' . ($isAdmin ? 'admin_recipes' : 'coach_recipes'));
+            exit;
+        }
+        $errors = [];
+        $old    = $recipeController->fromRecipe($editing);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $old = $recipeController->fromPost($_POST);
+            if (!$authController->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+                $errors['csrf'] = 'Your form has expired. Please try again.';
+            } else {
+                $errors = $recipeController->validate($old);
+                if (empty($errors)) {
+                    $recipeRepository->update(
+                        $editing['id'],
+                        $recipeController->normalized($old),
+                        $recipeController->parseSteps($old['steps'])
+                    );
+                    AuthController::flash('Recipe updated successfully.');
+                    header('Location: index.php?action=' . ($isAdmin ? 'admin_recipes' : 'coach_recipes'));
+                    exit;
+                }
+            }
+        }
+        $recipes     = $recipeRepository->recipes(null, null, $isAdmin ? null : $currentUser->getId());
+        $categories  = $recipeRepository->categories();
+        $stats       = $recipeRepository->stats($isAdmin ? null : $currentUser->getId());
+        $csrfToken   = $authController->getCsrfToken();
+        $currentPage = 'admin_recipes';
+        require __DIR__ . '/Views/Backoffice/nutrition/recipes.php';
+        break;
+
+    case 'admin_delete_recipe':
+    case 'coach_delete_recipe':
+        $currentUser = $authController->requireAuth();
+        $isAdmin     = $currentUser->getRoleName() === 'admin';
+        $back        = 'index.php?action=' . ($isAdmin ? 'admin_recipes' : 'coach_recipes');
+        if (!in_array($currentUser->getRoleName(), ['admin', 'coach'], true)) {
+            http_response_code(403);
+            echo '403 Access Denied';
+            break;
+        }
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !$authController->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+            AuthController::flash('Your form has expired. Please try again.', 'error');
+            header('Location: ' . $back);
+            exit;
+        }
+        $recipeRepository = new RecipeRepository(Database::getConnexion());
+        $recipeController = new RecipeController($recipeRepository);
+        $target = $recipeRepository->find((int)($_POST['id'] ?? 0));
+        if (!$target || !$recipeController->canManage($currentUser, $target)) {
+            AuthController::flash('Recipe not found or access denied.', 'error');
+        } else {
+            $recipeRepository->delete($target['id']);
+            AuthController::flash('Recipe deleted.');
+        }
+        header('Location: ' . $back);
+        exit;
+
+    case 'admin_recipe_categories':
+        $currentUser      = $authController->requireRole('admin');
+        $recipeRepository = new RecipeRepository(Database::getConnexion());
+        $recipeController = new RecipeController($recipeRepository);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!$authController->verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+                AuthController::flash('Your form has expired. Please try again.', 'error');
+            } else {
+                $operation = (string)($_POST['op'] ?? '');
+                $name      = trim((string)($_POST['name'] ?? ''));
+                $id        = (int)($_POST['id'] ?? 0);
+                try {
+                    if ($operation === 'delete') {
+                        $recipeRepository->deleteCategory($id)
+                            ? AuthController::flash('Category deleted.')
+                            : AuthController::flash('Category not found.', 'error');
+                    } else {
+                        $nameError = $recipeController->validateCategoryName($name);
+                        if ($nameError !== null) {
+                            AuthController::flash($nameError, 'error');
+                        } elseif ($operation === 'update') {
+                            $recipeRepository->updateCategory($id, $name)
+                                ? AuthController::flash('Category updated.')
+                                : AuthController::flash('Category not found.', 'error');
+                        } else {
+                            $recipeRepository->createCategory($name);
+                            AuthController::flash('Category created.');
+                        }
+                    }
+                } catch (DomainException $error) {
+                    AuthController::flash($error->getMessage(), 'error');
+                }
+            }
+            header('Location: index.php?action=admin_recipe_categories');
+            exit;
+        }
+        $categories  = $recipeRepository->categories();
+        $csrfToken   = $authController->getCsrfToken();
+        $currentPage = 'admin_recipe_categories';
+        require __DIR__ . '/Views/Backoffice/nutrition/categories.php';
+        break;
     case 'admin_sessions':
     case 'coach_sessions':
         $currentUser = $authController->requireAuth();

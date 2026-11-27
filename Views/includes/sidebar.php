@@ -69,6 +69,17 @@ $profileAction = $isAdmin ? 'admin_profile' : 'profile';
                 <i class="fa-solid fa-list"></i> Browse Plans
             </a>
 
+            <div class="bo-nav-label">Nutrition &amp; Recipes</div>
+            <a href="index.php?action=admin_recipes" class="bo-nav-link <?= $boActive('admin_recipes') ?>">
+                <i class="fa-solid fa-utensils"></i> Manage Recipes
+            </a>
+            <a href="index.php?action=admin_recipe_categories" class="bo-nav-link <?= $boActive('admin_recipe_categories') ?>">
+                <i class="fa-solid fa-tags"></i> Recipe Categories
+            </a>
+            <a href="index.php?action=recipes" class="bo-nav-link">
+                <i class="fa-solid fa-book-open"></i> Browse Recipes
+            </a>
+
             <div class="bo-nav-label">Marketplace</div>
             <a href="index.php?action=market_admin" class="bo-nav-link <?= $boActive('market_admin') ?>">
                 <i class="fa-solid fa-shop"></i> Market Admin
@@ -100,6 +111,12 @@ $profileAction = $isAdmin ? 'admin_profile' : 'profile';
             <a href="index.php?action=<?= $isAdmin ? 'admin_sessions' : 'coach_sessions' ?>" class="bo-nav-link <?= $boActive('admin_sessions') ?>">
                 <i class="fa-solid fa-calendar-plus"></i> Manage Sessions
             </a>
+        <?php endif; ?>
+        
+        <?php if (!$isAdmin): ?>
+                <a href="index.php?action=coach_recipes" class="bo-nav-link <?= $boActive('admin_recipes') ?>">
+                    <i class="fa-solid fa-utensils"></i> Manage Recipes
+                </a>
         <?php endif; ?>
     </nav>
 

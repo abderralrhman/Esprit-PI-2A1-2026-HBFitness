@@ -60,6 +60,11 @@ $isBlogActive    = in_array($currentPage, ['blog', 'articles', 'my_comments', 'c
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link <?= $isActive('recipes') ?>" href="index.php?action=recipes">
+                        <i class="fa-solid fa-utensils me-1"></i> Recipes
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link <?= $isActive('sessions') ?>" href="index.php?action=sessions">
                         <i class="fa-solid fa-person-running me-1"></i> Sessions
                     </a>
@@ -70,7 +75,13 @@ $isBlogActive    = in_array($currentPage, ['blog', 'articles', 'my_comments', 'c
                             <i class="fa-solid fa-calendar-check me-1"></i> Manage Sessions
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= $isActive('admin_recipes') ?>" href="index.php?action=coach_recipes">
+                            <i class="fa-solid fa-carrot me-1"></i> Manage Recipes
+                        </a>
+                    </li>
                 <?php endif; ?>
+                
                 <?php if ($isAuthenticated && $navUserRole !== 'admin'): ?>
                     <li class="nav-item">
                         <a class="nav-link <?= $isActive('profile') ?>" href="index.php?action=profile">
